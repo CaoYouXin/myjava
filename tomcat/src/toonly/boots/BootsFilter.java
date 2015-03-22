@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import toonly.configer.PropsConfiger;
 import toonly.configer.cache.UncachedException;
 import toonly.configer.watcher.ChangeWatcherSupport;
+import toonly.configer.watcher.WatchServiceWrapper;
 import toonly.dbmanager.lowlevel.DB;
 import toonly.debugger.BugReporter;
 import toonly.debugger.Debugger;
@@ -171,7 +172,7 @@ public class BootsFilter implements Filter {
         log.info("shutdown ...");
         BugReporter.closeClient();
         DB.instance().close();
-        ChangeWatcherSupport.stopWatching();
+        WatchServiceWrapper.instance.stopWatching();
         log.info("shutdown done");
     }
 }

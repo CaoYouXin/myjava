@@ -2,6 +2,7 @@ package toonly.debugger;
 
 import toonly.configer.PropsConfiger;
 import toonly.configer.cache.UncachedException;
+import toonly.configer.watcher.ChangeWatcher;
 import toonly.wrapper.Bool;
 
 import java.util.Properties;
@@ -9,7 +10,7 @@ import java.util.Properties;
 /**
  * Created by caoyouxin on 15-2-23.
  */
-public class RuleConfiger extends PropsConfiger {
+public class RuleConfiger extends PropsConfiger implements ChangeWatcher.ChangeListener {
 
     public static final RuleConfiger val = new RuleConfiger();
 
@@ -54,10 +55,30 @@ public class RuleConfiger extends PropsConfiger {
     }
 
     private Properties get() {
+        this.watch("debugger.prop").AddChangeListener(this);
         try {
             return this.cache("debugger.prop");
         } catch (UncachedException e) {
             return this.config("debugger.prop");
         }
+    }
+
+    @Override
+    public void onChange() {
+        Properties props = this.config("debugger.prop");
+
+        RuleListTreeNode aDefault = new RuleListTreeNode("default", Feature.DEFAULT_RULE.isOn());
+
+        props.forEach((invokerName, isDebugging) -> {
+            RuleListTreeNode tmp = aDefault;
+            String invoker = invokerName.toString();
+            for (String name : invoker.split("\\.")) {
+                tmp = tmp.getOrAdd(name);
+            }
+            tmp.val(Bool.val((String) isDebugging).val());
+        });
+
+        _ruleListTree = aDefault;
+        _ruleListTree.print(0);
     }
 }

@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,25 +46,7 @@ public class ReportConfiger implements FileTool, CachedConfiger<ReportConfiger>,
         }
 
         bufferedReader.lines().forEach((line) -> {
-            int i = 0;
-            while (true) {
-                int j = line.indexOf('%', i);
-
-                if (-1 == j) {
-                    // no more replacements
-                    this._docs.add(line.substring(i, line.length()));
-                    break;
-                } else {
-                    this._docs.add(line.substring(i, j));
-                }
-
-                int k = line.indexOf('%', j + 1);
-
-                this._docs.add(line.substring(j + 1, k));
-
-                i = k + 1;
-            }
-
+            this._docs.addAll(Arrays.asList(line.split("%")));
             this._docs.add("\n");
         });
         cache.store(relativePath, this._docs);

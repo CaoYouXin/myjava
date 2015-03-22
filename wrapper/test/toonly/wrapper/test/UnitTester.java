@@ -14,4 +14,11 @@ public class UnitTester {
         System.out.println(new StringWrapper("abc").md5_32().val());
     }
 
+    @Test
+    public void iminusminus() {
+        int i = 1;
+        System.out.println(i-- > 0);
+        System.out.println(i-- > 0);
+    }
+
 }

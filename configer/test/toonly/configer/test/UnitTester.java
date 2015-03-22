@@ -26,24 +26,8 @@ public class UnitTester {
         String line = "abs%ss%ssd%sdf%af";
         List<String> docs = new ArrayList<>();
 
-        int i = 0;
-        while (true) {
-            int j = line.indexOf('%', i);
-
-            if (-1 == j) {
-                // no more replacements
-                docs.add(line.substring(i, line.length()));
-                break;
-            } else {
-                docs.add(line.substring(i, j));
-            }
-
-            int k = line.indexOf('%', j + 1);
-
-            docs.add(line.substring(j + 1, k));
-
-            i = k + 1;
-        }
+        docs.addAll(Arrays.asList(line.split("%")));
+        docs.add("\n");
 
         System.out.println(docs);
 
@@ -71,6 +55,12 @@ public class UnitTester {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void asListTest() {
+        List<String> strings = Arrays.asList("a", "b", "a");
+        strings.stream().map((str) -> "a".equals(str) ? "c" : str).forEach(System.out::println);
     }
 
     public static void main(String[] args) {

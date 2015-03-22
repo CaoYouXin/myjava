@@ -84,7 +84,8 @@ public class StringWrapper extends SW<String> {
         String property = System.getProperty("file.separator");
         String[] split = this.val().split("\\.");
         StringBuilder sb = new StringBuilder();
-        for (String pkg : split) {
+        int i = split.length;
+        while (i-- > 0) {
             sb.append("..").append(property);
         }
         return (StringWrapper) this.val(sb.toString());

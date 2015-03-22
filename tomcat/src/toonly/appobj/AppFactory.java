@@ -106,24 +106,28 @@ public class AppFactory implements ChangeWatcher.ChangeListener {
         PofC pofC = aClass.getDeclaredAnnotation(PofC.class);
         if (!permission && null != pofC) {
             for (DMethod p : pofC.ps()) {
-                if (p.name().equals(methodName))
+                if (p.name().equals(methodName)) {
                     permission = p.who().contains(userP);
+                }
             }
         }
         try {
             Method method = aClass.getMethod(methodName);
-            if (permission)
+            if (permission) {
                 return method.invoke(app);
-            else {
+            } else {
                 PofM pofM = method.getDeclaredAnnotation(PofM.class);
-                if (permission = pofM.who().contains(userP))
+                permission = pofM.who().contains(userP);
+                if (permission) {
                     return method.invoke(app);
+                }
             }
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             BugReporter.reportBug(this, "app["+ aClass.getName()+"] 在 执行调用 的时候，不幸遇难。", e);
         }
-        if (!permission)
+        if (!permission) {
             return new UnPermissioned();
+        }
         return null;
     }
 }

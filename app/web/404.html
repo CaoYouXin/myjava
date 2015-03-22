@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+<title>404错误 - 樂之道服装仓库系统</title>
+<link href="css/main.css" rel="stylesheet" type="text/css" />
+<!--[if IE 8]><link href="css/ie8.css" rel="stylesheet" type="text/css" /><![endif]-->
+<!--[if IE 9]><link href="css/ie9.css" rel="stylesheet" type="text/css" /><![endif]-->
+
+<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.9.2.min.js"></script>
+
+<script type="text/javascript" src="js/plugins/ui/jquery.fancybox.js"></script>
+
+<script type="text/javascript" src="js/files/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+	$(function(){
+		//===== Fancybox =====//
+
+		$(".lightbox").fancybox({
+			'padding': 2
+		});
+	});
+</script>
+
+</head>
+
+<body class="no-background">
+
+	<!-- Fixed top -->
+	<div id="top">
+		<div class="fixed">
+			<a href="index.jsp" title="樂之道服装仓库系统" class="logo"><img src="img/logo.png" alt="樂之道服装仓库系统" /><span style="font-size: 15px;">仓库系统</span></a>
+			<ul class="top-menu">
+				<li><a href="#" title="" class="messages"><i class="new-message"></i></a></li>
+				<li class="dropdown">
+					<a class="user-menu" data-toggle="dropdown"><img src="img/userpic.png" alt="" /><span>曹又心<b class="caret"></b></span></a>
+					<ul class="dropdown-menu">
+						<li><a href="#" title=""><i class="icon-user"></i>个人信息</a></li>
+						<li><a href="#" title=""><i class="icon-cog"></i>编辑信息</a></li>
+						<li><a href="#" title=""><i class="icon-inbox"></i>新消息<span class="badge badge-info">9</span></a></li>
+						<li><a href="#" title=""><i class="icon-remove"></i>登出</a></li>
+					</ul>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<!-- /fixed top -->
+
+
+    <!-- Breadcrumbs line -->
+    <div class="crumbs">
+        <ul id="breadcrumbs" class="breadcrumb"> 
+            <li><a href="index.jsp">仪表盘</a></li>
+            <li class="active"><a href="404.html" title="">404 错误</a></li>
+        </ul>
+    </div>
+    <!-- /breadcrumbs line -->
+
+
+	<!-- Error wrapper -->
+	<div class="error-page">
+	    <span class="reason">404</span>
+		<div class="error-content">
+	        <span class="reason-title">- 抱歉，发生了错误。页面找不到！ -</span>
+
+	    	<!-- Search widget -->
+	    	<form class="search" action="#">
+	    		<div class="autocomplete-append">
+		    		<input type="text" placeholder="search website..." id="autocomplete" />
+		    		<input type="submit" class="btn btn-info" value="Search" />
+		    	</div>
+	    	</form>
+	    	<!-- /search widget -->
+
+	        <div class="row-fluid error-buttons">
+	            <a href="index.jsp" title="" class="btn btn-info span6">回到仪表盘</a>
+	            <a href="index.jsp" title="" class="btn btn-success span6">回到网站</a>
+	        </div>
+	    </div>
+	</div>  
+	<!-- /error wrapper -->
+
+
+	<!-- Footer -->
+	<div id="footer">
+		<div class="copyrights">Copyright &copy; 2015.CPU All rights reserved.<a target="_blank" href="https://github.com/CaoYouXin/storehouse">项目托管</a></div>
+		<ul class="footer-links ">
+			<li class="dropup">
+				<a class="user-menu" data-toggle="dropdown"><i class="icon-cogs"></i><span>联系管理员<b class="caret"></b></span></a>
+				<ul class="dropdown-menu">
+					<li>
+						<a href="#data" class="lightbox"><i class="icon-user"></i>曹同学【开发人员】</a>
+						<div style="display:none"><div id="data">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</div></div>
+					</li>
+				</ul>
+			</li>
+			<li><a href="" title="" class="user-menu"><i class="icon-screenshot"></i>报告错误</a></li>
+		</ul>
+	</div>
+	<!-- /footer -->
+
+</body>
+</html>

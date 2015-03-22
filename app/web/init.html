@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+<title>初始化 - 樂之道服装仓库系统</title>
+<link href="css/main.css" rel="stylesheet" type="text/css" />
+<!--[if IE 8]><link href="css/ie8.css" rel="stylesheet" type="text/css" /><![endif]-->
+<!--[if IE 9]><link href="css/ie9.css" rel="stylesheet" type="text/css" /><![endif]-->
+
+<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.9.2.min.js"></script>
+
+<script type="text/javascript" src="js/plugins/ui/jquery.fancybox.js"></script>
+
+<script type="text/javascript" src="js/plugins/forms/jquery.uniform.min.js"></script>
+
+<script type="text/javascript" src="js/files/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    $(function() {
+        //===== Fancybox =====//
+
+        $(".lightbox").fancybox({
+            'padding': 2
+        });
+
+        $("#update").click(function(event) {
+            $.getJSON( "/init.do", function( data ) {
+                $.each( data, function( key, val ) {
+                    if (val == "True") {
+                        window.location.href = "/login.html";
+                    } else {
+                        alert("数据库更新出问题了，请“举报bug”！");
+                    }
+                });
+            });
+        });
+    });
+</script>
+
+<script type="text/javascript" src="js/files/login.js"></script>
+
+</head>
+
+<body class="no-background">
+	<!-- Fixed top -->
+	<div id="top">
+		<div class="fixed">
+			<a href="index.jsp" title="樂之道服装仓库系统" class="logo"><img src="img/logo.png" alt="樂之道服装仓库系统" /><span style="font-size: 15px;">仓库系统</span></a>
+		</div>
+	</div>
+	<!-- /fixed top -->
+
+    <div id="login" class="login">
+        <p>您的数据库需要更新</p>
+        <div class="widget">
+            <button id="update" class="btn btn-block btn-danger">更新</button>
+        </div>
+    </div>
+
+	<!-- Footer -->
+	<div id="footer">
+		<div class="copyrights">Copyright &copy; 2015.CPU All rights reserved.<a target="_blank" href="https://github.com/CaoYouXin/storehouse">项目托管</a></div>
+		<ul class="footer-links ">
+            <li class="dropup">
+                <a class="user-menu" data-toggle="dropdown"><i class="icon-cogs"></i><span>联系管理员<b class="caret"></b></span></a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="#data" class="lightbox"><i class="icon-user"></i>曹同学【开发人员】</a>
+                        <div style="display:none"><div id="data">
+                            <br>邮箱：c_youxin@163.com
+                            <br>电话：18535276856
+                        </div></div>
+                    </li>
+                </ul>
+            </li>
+			<li><a href="" title="" class="user-menu"><i class="icon-screenshot"></i>报告错误</a></li>
+		</ul>
+	</div>
+	<!-- /footer -->
+
+</body>
+</html>

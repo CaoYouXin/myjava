@@ -75,7 +75,7 @@ public class StringWrapper extends SW<String> {
             }
             this.val(fn.apply(sb));
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            System.err.println("There is no MD5 algorithm.");
         }
         return this;
     }

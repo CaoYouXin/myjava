@@ -28,7 +28,7 @@ public class PropsConfiger implements FileTool, CachedConfiger<Properties>, Simp
         try {
             props.load(new FileInputStream(this.getFile(relativePath)));
         } catch (IOException ex) {
-            ex.printStackTrace();
+            return null;
         }
         cache.store(relativePath, props);
         return props;

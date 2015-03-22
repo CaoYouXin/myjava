@@ -20,9 +20,7 @@ public class HipChatClient {
     private CloseableHttpClient httpClient;
     private ExecutorService executorService;
     private String defaultAccessToken;
-    //TODO move this out
     private int maxConnections = 20;
-    //TODO move this out
     private int maxConnectionsPerRoute = 4;
 
 
@@ -42,14 +40,6 @@ public class HipChatClient {
         log.debug("Max pool size: {}", maxConnections);
         cm.setDefaultMaxPerRoute(maxConnectionsPerRoute);
         log.debug("Max per route: {}", maxConnectionsPerRoute);
-//        ConnectionConfig connectionConfig = ConnectionConfig.custom()
-//                .setMalformedInputAction(CodingErrorAction.IGNORE)
-//                .setUnmappableInputAction(CodingErrorAction.IGNORE)
-//                .setCharset(Consts.UTF_8)
-//                .build();
-//        cm.setDefaultConnectionConfig(connectionConfig);
-//        cm.setConnectionConfig(new HttpHost("api.hipchat.com", 80), connectionConfig);
-//        log.info("Charset: {}", Consts.UTF_8);
 
         httpClient = HttpClients.custom().setConnectionManager(cm).build();
         //setting the thread pool size equal to the max connections size

@@ -50,14 +50,12 @@ public class DS implements DataSource {
         });
         try {
             com.mysql.jdbc.AbandonedConnectionCleanupThread.shutdown();
-        } catch (Throwable t) {}
+        } catch (InterruptedException e) {}
         Enumeration<Driver> drivers = DriverManager.getDrivers();
         try {
             while (drivers.hasMoreElements())
                 DriverManager.deregisterDriver(drivers.nextElement());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) {}
     }
 
     private Properties getConnInfo() {
@@ -105,7 +103,7 @@ public class DS implements DataSource {
             this.max = newMax;
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("can not make more connections.");
             return false;
         }
     }

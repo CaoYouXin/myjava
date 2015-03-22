@@ -80,7 +80,6 @@ public class WatchServiceWrapper implements FileTool {
         try {
             watchService.close();
         } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 

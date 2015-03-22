@@ -39,7 +39,7 @@ public class ECCalculator {
             scanEC(this._source.getClass());
             this._isScaned = true;
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            System.err.println("entity class scan failed.");
         }
     }
 

@@ -38,7 +38,6 @@ public class ReportConfiger implements FileTool, CachedConfiger<ReportConfiger>,
         try {
             bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(this.getFile(relativePath))));
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
         }
 
         if (null == bufferedReader) {

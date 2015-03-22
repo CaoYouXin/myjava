@@ -41,7 +41,7 @@ public class BootsFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         log.info("boot ...");
-        Feature.set(6);
+        Feature.set(0);
         this._configer = this.getConfger();
         this._matchers = Arrays.asList(this._configer.getProperty("blocks", "/blocks").split("\\|\\|"));
         Debugger.debugRun(this, () -> {

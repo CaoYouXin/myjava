@@ -1,1 +1,5 @@
 toonly.dbmanager.lowlevel.DB=true
+#注入测试帐号
+toonly.boots.ServletUser=true
+#登录测试帐号
+toonly.boots.BootsFilter=true

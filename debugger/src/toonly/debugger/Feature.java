@@ -5,10 +5,10 @@ package toonly.debugger;
  */
 public enum Feature {
 
-    LOW_LEVEL_FLAG,
-    SIMPLE_MODE,
-    SIMPLE_MODE_RULE,
-    DEFAULT_RULE;
+    LOW_LEVEL_FLAG,//1
+    SIMPLE_MODE,//2
+    SIMPLE_MODE_RULE,//4
+    DEFAULT_RULE;//8
 
     private static volatile int _flag = 0;
 

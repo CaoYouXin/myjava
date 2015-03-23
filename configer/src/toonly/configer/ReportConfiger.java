@@ -1,5 +1,7 @@
 package toonly.configer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import toonly.configer.cache.Cache;
 import toonly.configer.cache.CachedConfiger;
 import toonly.configer.cache.UncachedException;
@@ -18,12 +20,16 @@ import java.util.Map;
  */
 public class ReportConfiger implements FileTool, CachedConfiger<ReportConfiger>, SimpleConfiger<ReportConfiger> {
 
-    private static class MyList extends ArrayList<String> {}
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReportConfiger.class);
 
-    private Cache<MyList> cache = Cache.get(MyList.class);
+    private final Cache<MyList> cache = Cache.get(MyList.class);
 
     private MyList docs = new MyList();
     private Map<String, String> reps = new HashMap<>();
+
+    private ReportConfiger(MyList cache) {
+        this.docs = cache;
+    }
 
     public ReportConfiger() {
     }
@@ -63,9 +69,15 @@ public class ReportConfiger implements FileTool, CachedConfiger<ReportConfiger>,
     }
 
     @Override
-    public ReportConfiger cache(String relativePath) throws UncachedException {
-        ReportConfiger reportConfiger = new ReportConfiger();
-        reportConfiger.docs = cache.cache(relativePath);
-        return reportConfiger;
+    public ReportConfiger cache(String relativePath) {
+        try {
+            return new ReportConfiger(cache.cache(relativePath));
+        } catch (UncachedException e) {
+            LOGGER.info(e.getLocalizedMessage());
+            return this.config(relativePath);
+        }
+    }
+
+    private static class MyList extends ArrayList<String> {
     }
 }

@@ -16,7 +16,6 @@ public class RuleConfiger extends PropsConfiger implements ChangeWatcher.ChangeL
 
     public static final RuleConfiger val = new RuleConfiger();
     public static final String CONFIG_FILE_NAME = "debugger.prop";
-    private static final Logger LOGGER = LoggerFactory.getLogger(RuleConfiger.class);
     private RuleListTreeNode _ruleListTree;
 
     public boolean applyRule(String invokerName) {
@@ -41,9 +40,9 @@ public class RuleConfiger extends PropsConfiger implements ChangeWatcher.ChangeL
             return;
         }
 
-        _ruleListTree = new RuleListTreeNode("default", Feature.DEFAULT_RULE.isOn());
+        Properties props = this.watch(CONFIG_FILE_NAME).AddChangeListener(this).cache(CONFIG_FILE_NAME);
 
-        Properties props = this.get();
+        _ruleListTree = new RuleListTreeNode("default", Feature.DEFAULT_RULE.isOn());
 
         props.forEach((invokerName, isDebugging) -> {
             RuleListTreeNode tmp = _ruleListTree;
@@ -57,19 +56,9 @@ public class RuleConfiger extends PropsConfiger implements ChangeWatcher.ChangeL
         _ruleListTree.print(0);
     }
 
-    private Properties get() {
-        this.watch(CONFIG_FILE_NAME).AddChangeListener(this);
-        try {
-            return this.cache(CONFIG_FILE_NAME);
-        } catch (UncachedException e) {
-            LOGGER.info(e.getLocalizedMessage());
-            return this.config(CONFIG_FILE_NAME);
-        }
-    }
-
     @Override
     public void onChange() {
-        Properties props = this.config("debugger.prop");
+        Properties props = this.config(CONFIG_FILE_NAME);
 
         RuleListTreeNode aDefault = new RuleListTreeNode("default", Feature.DEFAULT_RULE.isOn());
 

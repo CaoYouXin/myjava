@@ -3,7 +3,6 @@ package toonly.dbmanager.repos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import toonly.configer.PropsConfiger;
-import toonly.configer.cache.UncachedException;
 import toonly.dbmanager.base.*;
 import toonly.dbmanager.lowlevel.DT;
 import toonly.dbmanager.lowlevel.RS;
@@ -19,7 +18,7 @@ public class Program implements Addable, Modable, Delable, Selable, Creatable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Program.class);
     private static final String CONFIG_FILE_NAME = "program.repo";
-    private Properties config = this.getConfig();
+    private Properties config = new PropsConfiger().cache(CONFIG_FILE_NAME);
     @Column
     @KeyColumn
     @DT(type = DT.Type.shorttext)
@@ -42,16 +41,6 @@ public class Program implements Addable, Modable, Delable, Selable, Creatable {
     @Override
     public String getTableName() {
         return RepoConsts.PROGRAM_TB;
-    }
-
-    private Properties getConfig() {
-        PropsConfiger propsConfiger = new PropsConfiger();
-        try {
-            return propsConfiger.cache(CONFIG_FILE_NAME);
-        } catch (UncachedException e) {
-            LOGGER.info(e.getLocalizedMessage());
-            return propsConfiger.config(CONFIG_FILE_NAME);
-        }
     }
 
     public String getName() {

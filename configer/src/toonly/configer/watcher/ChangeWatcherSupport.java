@@ -28,11 +28,12 @@ public class ChangeWatcherSupport<T> implements ChangeWatcher<T>, FileTool {
     }
 
     @Override
-    public void AddChangeListener(@NotNull ChangeListener listener) {
+    public T AddChangeListener(@NotNull ChangeListener listener) {
         if (null == this.listenerList) {
             this.listenerList = new ArrayList<>();
         }
         this.listenerList.add(listener);
+        return this.source;
     }
 
     @Override

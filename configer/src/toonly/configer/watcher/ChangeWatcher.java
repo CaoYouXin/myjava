@@ -9,7 +9,7 @@ public interface ChangeWatcher<T> {
         public void onChange();
     }
 
-    public void AddChangeListener(ChangeListener listener);
+    public T AddChangeListener(ChangeListener listener);
 
     public T watch(String relativePath);
 

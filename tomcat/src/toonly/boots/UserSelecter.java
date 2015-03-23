@@ -18,9 +18,8 @@ import java.util.Properties;
  */
 public class UserSelecter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserSelecter.class);
     private static final String CONFIG_FILE_NAME = "user.cfg";
-    private static final Properties CONFIGS = getConfigs();
+    private static final Properties CONFIGS = new PropsConfiger().cache(CONFIG_FILE_NAME);
     private static final String USERNAME_FIELD = CONFIGS.getProperty("username", "username");
     private static final String PASSWORD_FIELD = CONFIGS.getProperty("password", "password");
     private static final String PERMISSION_FIELD = CONFIGS.getProperty("permission", "permission");
@@ -28,16 +27,6 @@ public class UserSelecter {
     private static final String USER_TABLE = CONFIGS.getProperty("table", "user");
 
     private UserSelecter() {
-    }
-
-    private static Properties getConfigs() {
-        PropsConfiger propsConfiger = new PropsConfiger();
-        try {
-            return propsConfiger.cache(CONFIG_FILE_NAME);
-        } catch (UncachedException e) {
-            LOGGER.info("file[{}] not cached.", CONFIG_FILE_NAME);
-            return propsConfiger.config(CONFIG_FILE_NAME);
-        }
     }
 
     public static Ret check(@NotNull String username, @NotNull String password) {

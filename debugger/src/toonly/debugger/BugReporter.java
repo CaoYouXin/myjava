@@ -7,7 +7,6 @@ import io.evanwong.oss.hipchat.v2.rooms.SendRoomNotificationRequestBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import toonly.configer.ReportConfiger;
-import toonly.configer.cache.UncachedException;
 
 import java.util.Objects;
 
@@ -16,9 +15,9 @@ import java.util.Objects;
  */
 public class BugReporter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BugReporter.class);
     private static final String DEFAULT_ACCESS_TOKEN = "9zN2DuwhwU00OxsLeXofa8oerJuz8hELHHvTMyxt";
     private static final HipChatClient HIPCHAT_CLIENT = new HipChatClient(DEFAULT_ACCESS_TOKEN);
+    private static final ReportConfiger REPORT_CONFIGER_HOOK = new ReportConfiger();
 
     public static final void closeClient() {
         HIPCHAT_CLIENT.close();
@@ -49,7 +48,7 @@ public class BugReporter {
                 sb.append(ele.toString()).append("\n");
             }
         }
-        ReportConfiger config = getConfig();
+        ReportConfiger config = REPORT_CONFIGER_HOOK.cache("bug.report");
         SendRoomNotificationRequestBuilder builder = HIPCHAT_CLIENT.prepareSendRoomNotificationRequestBuilder("Nullzone"
                 , config
                 .report("class", name)
@@ -57,16 +56,6 @@ public class BugReporter {
                 .report("exp", Objects.toString(sb, "NULL"))
                 .toString());
         builder.setMessageFormat(MessageFormat.TEXT).setColor(MessageColor.YELLOW).setNotify(true).build().execute();
-    }
-
-    private static ReportConfiger getConfig() {
-        ReportConfiger reportConfiger = new ReportConfiger();
-        try {
-            return reportConfiger.cache("bug.report");
-        } catch (UncachedException e) {
-            LOGGER.info(e.getLocalizedMessage());
-            return reportConfiger.config("bug.report");
-        }
     }
 
 }

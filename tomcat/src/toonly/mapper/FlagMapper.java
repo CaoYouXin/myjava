@@ -37,17 +37,7 @@ public class FlagMapper extends HttpServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlagMapper.class);
     private static final String CONFIG_FILE_NAME = "redirect.prop";
     private ThreadLocal<String> line1 = new ThreadLocal<>();
-    private Properties redirectConfiger = this.getConfger();
-
-    private Properties getConfger() {
-        PropsConfiger propsConfiger = new PropsConfiger();
-        try {
-            return propsConfiger.cache(CONFIG_FILE_NAME);
-        } catch (UncachedException e) {
-            LOGGER.info(e.getLocalizedMessage());
-            return propsConfiger.config(CONFIG_FILE_NAME);
-        }
-    }
+    private Properties redirectConfiger = new PropsConfiger().cache(CONFIG_FILE_NAME);
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

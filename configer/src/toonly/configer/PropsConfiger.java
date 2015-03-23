@@ -1,5 +1,7 @@
 package toonly.configer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import toonly.configer.cache.Cache;
 import toonly.configer.cache.CachedConfiger;
 import toonly.configer.cache.UncachedException;
@@ -15,11 +17,18 @@ import java.util.Properties;
  */
 public class PropsConfiger implements FileTool, CachedConfiger<Properties>, SimpleConfiger<Properties>, ChangeWatcher<PropsConfiger> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(PropsConfiger.class);
+
     private final Cache<Properties> cache = Cache.get(Properties.class);
 
     @Override
-    public Properties cache(String relativePath) throws UncachedException {
-        return cache.cache(relativePath);
+    public Properties cache(String relativePath) {
+        try {
+            return cache.cache(relativePath);
+        } catch (UncachedException e) {
+            LOGGER.info(e.getLocalizedMessage());
+            return this.config(relativePath);
+        }
     }
 
     @Override
@@ -37,8 +46,8 @@ public class PropsConfiger implements FileTool, CachedConfiger<Properties>, Simp
     private ChangeWatcherSupport<PropsConfiger> support = new ChangeWatcherSupport<>(this);
 
     @Override
-    public void AddChangeListener(ChangeListener listener) {
-        this.support.AddChangeListener(listener);
+    public PropsConfiger AddChangeListener(ChangeListener listener) {
+        return this.support.AddChangeListener(listener);
     }
 
     @Override

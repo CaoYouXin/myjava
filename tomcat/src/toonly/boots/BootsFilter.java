@@ -57,23 +57,13 @@ public class BootsFilter implements Filter {
     public void init(FilterConfig filterConfig) throws ServletException {
         LOGGER.info("boot ...");
         Feature.set(0);
-        this.configer = this.getConfger();
+        this.configer = new PropsConfiger().cache(CONFIG_FILE_NAME);
         this.matchers = Arrays.asList(this.configer.getProperty("blocks", "/blocks").split("\\|\\|"));
         Debugger.debugRun(this, () -> {
             LOGGER.info("blocks : {}", this.matchers);
             _login("test", "S");
         });
         LOGGER.info("boot done");
-    }
-
-    private Properties getConfger() {
-        PropsConfiger propsConfiger = new PropsConfiger();
-        try {
-            return propsConfiger.cache(CONFIG_FILE_NAME);
-        } catch (UncachedException e) {
-            LOGGER.info(e.getLocalizedMessage());
-            return propsConfiger.config(CONFIG_FILE_NAME);
-        }
     }
 
     @Override

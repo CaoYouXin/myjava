@@ -34,7 +34,7 @@ public class AppFactory implements ChangeWatcher.ChangeListener {
     private final Map<String, Class<?>> map = new HashMap<>();
     private final PropsConfiger propsConfiger = new PropsConfiger();
 
-    private Properties config = this.getConfig();
+    private Properties config = this.propsConfiger.watch(APP_CFG).AddChangeListener(this).cache(APP_CFG);
 
     private AppFactory() {
         this.putToMap();
@@ -42,16 +42,6 @@ public class AppFactory implements ChangeWatcher.ChangeListener {
 
     private void putToMap() {
         this.config.forEach((key, whatever) -> this.map.put(key.toString(), this.loadAppClass(key.toString())));
-    }
-
-    private Properties getConfig() {
-        this.propsConfiger.watch(APP_CFG).AddChangeListener(this);
-        try {
-            return propsConfiger.cache(APP_CFG);
-        } catch (UncachedException e) {
-            LOGGER.info(e.getLocalizedMessage());
-            return propsConfiger.config(APP_CFG);
-        }
     }
 
     public Class<?> getAppClass(String key) {

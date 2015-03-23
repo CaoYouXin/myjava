@@ -1,5 +1,8 @@
 package toonly.wrapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -10,6 +13,9 @@ import java.util.function.Function;
  */
 public class StringWrapper extends SW<String> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(StringWrapper.class);
+    public static final String HTTPS = "https://"; //hack！"http://"的情况下，第一个字符也不可能是'/'
+
     public StringWrapper(String str) {
         super(str);
     }
@@ -18,18 +24,20 @@ public class StringWrapper extends SW<String> {
     }
 
     public StringWrapper wrapJoin(List<? extends Object> list, String wrap, String sep) {
-        if (list.isEmpty())
+        if (list.isEmpty()) {
             return (StringWrapper) this.val("");
+        }
         StringBuilder sb = new StringBuilder();
-        list.forEach((o) -> sb.append(sep).append(String.format("%s%s%s", wrap, o.toString(), wrap)));
+        list.forEach(o -> sb.append(sep).append(String.format("%s%s%s", wrap, o.toString(), wrap)));
         return (StringWrapper) this.val(sb.substring(sep.length()).toString());
     }
 
     public StringWrapper replaceJoin(List<? extends Object> list, String rep, String sep) {
-        if (list.isEmpty())
+        if (list.isEmpty()) {
             return (StringWrapper) this.val("");
+        }
         StringBuilder sb = new StringBuilder();
-        list.forEach((o) -> sb.append(sep).append(rep));
+        list.forEach(o -> sb.append(sep).append(rep));
         return (StringWrapper) this.val(sb.substring(sep.length()).toString());
     }
 
@@ -40,18 +48,19 @@ public class StringWrapper extends SW<String> {
     public StringWrapper unwrap(int len) {
         String val = this.val();
         int length = val.length();
-        if (len * 2 > length)
-            throw new RuntimeException("source is too short.");
+        if (len * 2 > length) {
+            throw new SourceCorruptedException("source is too short.");
+        }
         this.val(val.substring(len, length - len));
         return this;
     }
 
-    public StringWrapper md5_32() {
-        return this.md5((sb) -> sb.toString());
+    public StringWrapper md5Len32() {
+        return this.md5(sb -> sb.toString());
     }
 
-    public StringWrapper md5_16() {
-        return this.md5((sb) -> sb.toString().substring(8, 24));
+    public StringWrapper md5Len16() {
+        return this.md5(sb -> sb.toString().substring(8, 24));
     }
 
     private StringWrapper md5(Function<StringBuilder, String> fn) {
@@ -59,7 +68,7 @@ public class StringWrapper extends SW<String> {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(this.val().getBytes());
-            byte b[] = md.digest();
+            byte[] b = md.digest();
 
             int i;
 
@@ -75,7 +84,7 @@ public class StringWrapper extends SW<String> {
             }
             this.val(fn.apply(sb));
         } catch (NoSuchAlgorithmException e) {
-            System.err.println("There is no MD5 algorithm.");
+            LOGGER.info("There is no MD5 algorithm.");
         }
         return this;
     }
@@ -92,41 +101,46 @@ public class StringWrapper extends SW<String> {
     }
 
     public StringWrapper toRootPath() {
-        this.val(this.val().substring(this.val().indexOf('/', "https://".length())));
+        this.val(this.val().substring(this.val().indexOf('/', HTTPS.length())));
         return this;
     }
 
     public StringWrapper toRootPath(String find) {
-        return this.toRootPath(find, (substring) -> substring.startsWith("/") ? substring : '/' + substring);
+        return this.toRootPath(find, str -> str.startsWith("/") ? str : '/' + str);
     }
 
     public StringWrapper toRootPathQuickly(String find) {
-        return this.toRootPath(find, (str) -> str);
+        return this.toRootPath(find, str -> str);
     }
 
     private StringWrapper toRootPath(String find, Function<String, String> fn) {
-        String substring = this.val().substring(find.length() + this.val().indexOf(find, "https://".length()));
+        String substring = this.val().substring(find.length() + this.val().indexOf(find, HTTPS.length()));
         this.val(fn.apply(substring));
         return this;
     }
 
     public boolean matchFrom0(List<String> matchers) {
-        for (String matcher : matchers)
-            if (this.val().startsWith(matcher))
+        for (String matcher : matchers) {
+            if (this.val().startsWith(matcher)) {
                 return true;
+            }
+        }
         return false;
     }
 
     public boolean matchFrom0(String matcher) {
-        if (this.val().startsWith(matcher))
+        if (this.val().startsWith(matcher)) {
             return true;
+        }
         return false;
     }
 
     public boolean endWith(List<String> matchers) {
-        for (String matcher : matchers)
-            if (this.val().endsWith(matcher))
+        for (String matcher : matchers) {
+            if (this.val().endsWith(matcher)) {
                 return true;
+            }
+        }
         return false;
     }
 }

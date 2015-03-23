@@ -95,17 +95,21 @@ public class Program implements Addable, Modable, Delable, Selable, Creatable {
 
         RS rs = this.keySelect();
         while (rs.next()) {
-            int currentVersion = rs.getInt("version");
-            if (currentVersion < this.version) {
-                this.status = Status.UN_UPDATE_VS;
-                return false;
-            } else {
-                this.isRegistered = true;
-                return true;
-            }
+            return checkVersion(rs);
         }
         this.status = Status.NO_PROGRAM_RD;
         return false;
+    }
+
+    private boolean checkVersion(RS rs) {
+        int currentVersion = rs.getInt("version");
+        if (currentVersion < this.version) {
+            this.status = Status.UN_UPDATE_VS;
+            return false;
+        } else {
+            this.isRegistered = true;
+            return true;
+        }
     }
 
     public static enum Status {

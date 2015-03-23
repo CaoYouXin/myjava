@@ -1,5 +1,7 @@
 package toonly.dbmanager.sqlbuilder;
 
+import com.sun.istack.internal.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,11 +18,7 @@ public class ExpressionGroup implements Expression {
         this.first = expression;
     }
 
-    public ExpressionGroup addExpression(boolean isAndOrOr, Expression expression) {
-        if (null == expression) {
-            throw new NullPointerException("no expression identified.");
-        }
-
+    public ExpressionGroup addExpression(boolean isAndOrOr, @NotNull Expression expression) {
         if (null == this.isAndOrOrs) {
             this.isAndOrOrs = new ArrayList<>();
         }
@@ -36,14 +34,16 @@ public class ExpressionGroup implements Expression {
 
     @Override
     public String toSql() {
-        if (null == this.follows)
+        if (null == this.follows) {
             return String.format("(%s)", this.first.toSql());
-        return String.format("(%s%s)", this.first.toSql(), this._toSql());
+        }
+        return String.format("(%s%s)", this.first.toSql(), this.appendExpressionsToSql());
     }
 
-    private String _toSql() {
-        if (this.follows.size() != this.isAndOrOrs.size())
-            throw new RuntimeException("inner state error.");
+    private String appendExpressionsToSql() {
+        if (this.follows.size() != this.isAndOrOrs.size()) {
+            throw new BuildException("inner state error.");
+        }
 
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < this.follows.size(); i++) {
@@ -55,14 +55,16 @@ public class ExpressionGroup implements Expression {
 
     @Override
     public String toPreparedSql() {
-        if (null == this.follows)
+        if (null == this.follows) {
             return String.format("(%s)", this.first.toPreparedSql());
-        return String.format("(%s%s)", this.first.toPreparedSql(), this._toPreparedSql());
+        }
+        return String.format("(%s%s)", this.first.toPreparedSql(), this.appendExpressionsToPreparedSql());
     }
 
-    private String _toPreparedSql() {
-        if (this.follows.size() != this.isAndOrOrs.size())
-            throw new RuntimeException("inner state error.");
+    private String appendExpressionsToPreparedSql() {
+        if (this.follows.size() != this.isAndOrOrs.size()) {
+            throw new BuildException("inner state error.");
+        }
 
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < this.follows.size(); i++) {

@@ -72,8 +72,9 @@ public class ECCalculator {
 
     private boolean readColumn(Field declaredField) throws IllegalAccessException {
         Column declaredAnnotation = declaredField.getDeclaredAnnotation(Column.class);
-        if (null == declaredAnnotation)
+        if (null == declaredAnnotation) {
             return true;
+        }
         boolean accessible = declaredField.isAccessible();
         declaredField.setAccessible(true);
         Object value = declaredField.get(this.source);
@@ -98,7 +99,7 @@ public class ECCalculator {
 
         DT type = declaredField.getDeclaredAnnotation(DT.class);
         if (null == type) {
-            throw new RuntimeException("no db type defined");
+            throw new AnnotationCorruptedException("no db type defined");
         }
         this.dataType.put(declaredField.getName(), type);
     }
@@ -140,7 +141,7 @@ public class ECCalculator {
 
     public List<String> getFieldsExclude(List<String> keyColumns) {
         scan();
-        ArrayList<String> columns = new ArrayList<>(this.data.keySet());
+        List<String> columns = new ArrayList<>(this.data.keySet());
         keyColumns.forEach(key -> {
             if (columns.contains(key)) {
                 columns.remove(key);

@@ -19,7 +19,7 @@ public interface Delable extends Entity {
         TableId tableId = new TableId(this.getSchemaName(), this.getTableName());
         List<String> whereFields = ecc.getKeyFields();
         Where where = new Where(new Equal(tableId, whereFields.get(0)));
-        whereFields.subList(1, whereFields.size()).forEach((f) -> where.addExpression(true, new Equal(tableId, f)));
+        whereFields.subList(1, whereFields.size()).forEach(f -> where.addExpression(true, new Equal(tableId, f)));
 
         PreparedSQL delete = new Delete(tableId).where(where);
         return DB.instance().preparedExecute(delete.toPreparedSql(), 1, ecc.getValuesInOrder(whereFields));

@@ -19,15 +19,17 @@ public class Delete implements SQL, PreparedSQL {
 
     @Override
     public String toSql() {
-        if (null == this.where)
+        if (null == this.where) {
             return String.format("DELETE FROM %s", this.tableId.toSql());
+        }
         return String.format("DELETE FROM %s %s", this.tableId.toSql(), this.where.toSql());
     }
 
     @Override
     public String toPreparedSql() {
-        if (null == this.where)
+        if (null == this.where) {
             return String.format("DELETE FROM %s", this.tableId.toSql());
+        }
         return String.format("DELETE FROM %s %s", this.tableId.toSql(), this.where.toPreparedSql());
     }
 }

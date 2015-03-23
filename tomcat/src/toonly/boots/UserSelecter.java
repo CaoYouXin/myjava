@@ -1,6 +1,8 @@
 package toonly.boots;
 
 import com.sun.istack.internal.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import toonly.configer.PropsConfiger;
 import toonly.configer.cache.UncachedException;
 import toonly.dbmanager.lowlevel.DB;
@@ -16,34 +18,27 @@ import java.util.Properties;
  */
 public class UserSelecter {
 
-    static class Ret {
-        boolean needInit;
-        boolean suc;
-        String permission;
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserSelecter.class);
+    private static final String CONFIG_FILE_NAME = "user.cfg";
+    private static final Properties CONFIGS = getConfigs();
+    private static final String USERNAME_FIELD = CONFIGS.getProperty("username", "username");
+    private static final String PASSWORD_FIELD = CONFIGS.getProperty("password", "password");
+    private static final String PERMISSION_FIELD = CONFIGS.getProperty("permission", "permission");
+    private static final String USER_DB = CONFIGS.getProperty("schema", "userdb");
+    private static final String USER_TABLE = CONFIGS.getProperty("table", "user");
 
-        public Ret(boolean needInit, boolean suc, String permission) {
-            this.needInit = needInit;
-            this.suc = suc;
-            this.permission = permission;
-        }
+    private UserSelecter() {
     }
-
-    private static final Properties _configs = getConfigs();
 
     private static Properties getConfigs() {
         PropsConfiger propsConfiger = new PropsConfiger();
         try {
-            return propsConfiger.cache("user.cfg");
+            return propsConfiger.cache(CONFIG_FILE_NAME);
         } catch (UncachedException e) {
-            return propsConfiger.config("user.cfg");
+            LOGGER.info("file[{}] not cached.", CONFIG_FILE_NAME);
+            return propsConfiger.config(CONFIG_FILE_NAME);
         }
     }
-
-    private static final String _username = _configs.getProperty("username", "username");
-    private static final String _password = _configs.getProperty("password", "password");
-    private static final String _permission = _configs.getProperty("permission", "permission");
-    private static final String _userDb = _configs.getProperty("schema", "userdb");
-    private static final String _userTable = _configs.getProperty("table", "user");
 
     public static Ret check(@NotNull String username, @NotNull String password) {
         Updatable updatable = new Updatable() {
@@ -54,27 +49,41 @@ public class UserSelecter {
 
             @Override
             public String getSchemaName() {
-                return _userDb;
+                return USER_DB;
             }
 
             @Override
             public String getTableName() {
-                return _userTable;
+                return USER_TABLE;
             }
         };
-        if (updatable.needUpdateDDL())
-            return new Ret(true, false, P.NULL);
 
-        TableId tableId = new TableId(_userDb, _userTable);
-        PreparedSQL select = new Select(tableId, _username, _password, _permission)
-                .where(new Where(new Equal(tableId, _username)));
+        if (updatable.needUpdateDDL()) {
+            return new Ret(true, false, P.NULL);
+        }
+
+        TableId tableId = new TableId(USER_DB, USER_TABLE);
+        PreparedSQL select = new Select(tableId, USERNAME_FIELD, PASSWORD_FIELD, PERMISSION_FIELD)
+                .where(new Where(new Equal(tableId, USERNAME_FIELD)));
         RS rs = DB.instance().preparedQuery(select.toPreparedSql(), username);
         while (rs.next()) {
-            if (password.equals(rs.getString(_password))) {
-                return new Ret(false, true, rs.getString(_permission));
+            if (password.equals(rs.getString(PASSWORD_FIELD))) {
+                return new Ret(false, true, rs.getString(PERMISSION_FIELD));
             }
         }
         return new Ret(false, false, P.NULL);
+    }
+
+    static class Ret {
+        boolean needInit;
+        boolean suc;
+        String permission;
+
+        public Ret(boolean needInit, boolean suc, String permission) {
+            this.needInit = needInit;
+            this.suc = suc;
+            this.permission = permission;
+        }
     }
 
 }

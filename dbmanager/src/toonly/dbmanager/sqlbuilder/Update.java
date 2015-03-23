@@ -27,14 +27,15 @@ public class Update extends Delete implements SQL, PreparedSQL {
 
     @Override
     public String toSql() {
-        if (null == this.where)
-            return String.format("UPDATE %s %s", this.tableId.toSql(), this._toSql());
-        return String.format("UPDATE %s %s %s", this.tableId.toSql(), this._toSql(), this.where.toSql());
+        if (null == this.where) {
+            return String.format("UPDATE %s %s", this.tableId.toSql(), this.setsToSql());
+        }
+        return String.format("UPDATE %s %s %s", this.tableId.toSql(), this.setsToSql(), this.where.toSql());
     }
 
-    private String _toSql() {
-        if (1 > this.sets.size()) {
-            throw new RuntimeException("inner state error.");
+    private String setsToSql() {
+        if (this.sets.isEmpty()) {
+            throw new BuildException("inner state error.");
         }
 
         StringBuilder sb = new StringBuilder(this.sets.get(0).toSql());

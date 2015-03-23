@@ -7,6 +7,23 @@ import toonly.dbmanager.lowlevel.DT;
  * Created by cls on 15-3-15.
  */
 public class RepoInfo implements Creatable, Addable, Selable {
+    @Column
+    @KeyColumn
+    @DT(type = DT.Type.shorttext)
+    private String program;
+    @Column
+    @KeyColumn
+    @DT(type = DT.Type.shorttext)
+    private String db;
+    @Column
+    @KeyColumn
+    @DT(type = DT.Type.shorttext)
+    private String table;
+    @Column
+    @DuplicatedColumn
+    @DT(type = DT.Type.integer)
+    private int version;
+
     @Override
     public String getSchemaName() {
         return RepoConsts.REPO_DB;
@@ -16,15 +33,6 @@ public class RepoInfo implements Creatable, Addable, Selable {
     public String getTableName() {
         return RepoConsts.INFO_TB;
     }
-
-    @Column @KeyColumn @DT(type = DT.Type.shorttext)
-    private String program;
-    @Column @KeyColumn @DT(type = DT.Type.shorttext)
-    private String db;
-    @Column @KeyColumn @DT(type = DT.Type.shorttext)
-    private String table;
-    @Column @DuplicatedColumn @DT(type = DT.Type.integer)
-    private int version;
 
     public void setProgram(String program) {
         this.program = program;

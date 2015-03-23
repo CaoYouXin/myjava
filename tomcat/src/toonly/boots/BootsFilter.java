@@ -37,6 +37,19 @@ public class BootsFilter implements Filter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BootsFilter.class);
     private static final String CONFIG_FILE_NAME = "redirect.prop";
+    private static final String LOGIN_PAGE = "login_page";
+    private static final String DEFAULT_LOGIN_PAGE = "/login.html";
+    private static final String LOGIN_FAIL_PAGE = "login_fail";
+    private static final String DEFAULT_LOGIN_FAIL_PAGE = "/login.html#fail";
+    private static final String INIT_PAGE = "init_page";
+    private static final String DEFAULT_INIT_PAGE = "/init.html";
+    private static final String HOME_PAGE = "home_page";
+    private static final String DEFAULT_HOME_PAGE = "/index.jsp";
+    private static final String ADMIN_HOME_PAGE = "admin_home";
+    private static final String DEFAULT_ADMIN_HOME_PAGE = "/index.jsp#stuff";
+    private static final String BLOCK_PAGE = "block_page";
+    private static final String DEFAULT_BLOCK_PAGE = "/503.html";
+    private static final String API_V1 = "/api/v1";
     private Properties configer;
     private List<String> matchers;
 
@@ -47,7 +60,7 @@ public class BootsFilter implements Filter {
         this.configer = this.getConfger();
         this.matchers = Arrays.asList(this.configer.getProperty("blocks", "/blocks").split("\\|\\|"));
         Debugger.debugRun(this, () -> {
-            LOGGER.info("blocks : {}", Arrays.toString(this.matchers.toArray()));
+            LOGGER.info("blocks : {}", this.matchers);
             _login("test", "S");
         });
         LOGGER.info("boot done");
@@ -58,7 +71,7 @@ public class BootsFilter implements Filter {
         try {
             return propsConfiger.cache(CONFIG_FILE_NAME);
         } catch (UncachedException e) {
-            LOGGER.info("file[{}] not cached.", CONFIG_FILE_NAME);
+            LOGGER.info(e.getLocalizedMessage());
             return propsConfiger.config(CONFIG_FILE_NAME);
         }
     }
@@ -95,7 +108,7 @@ public class BootsFilter implements Filter {
         if (user.isLogin()) {
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
-            redirect(servletResponse, "login_page", "/login.html");
+            redirect(servletResponse, LOGIN_PAGE, DEFAULT_LOGIN_PAGE);
         }
     }
 
@@ -104,7 +117,7 @@ public class BootsFilter implements Filter {
          * 注销操作
          */
         if (stringWrapper.matchFrom0("/logout.do") && user.logout()) {
-            redirect(servletResponse, "login_page", "/login.html");
+            redirect(servletResponse, LOGIN_PAGE, DEFAULT_LOGIN_PAGE);
             return true;
         }
 
@@ -114,15 +127,15 @@ public class BootsFilter implements Filter {
         if (stringWrapper.matchFrom0("/login.do")) {
             if (user.login()) {
                 if (user.isAdmin()) {
-                    redirect(servletResponse, "admin_home", "/index.jsp#stuff");
+                    redirect(servletResponse, ADMIN_HOME_PAGE, DEFAULT_ADMIN_HOME_PAGE);
                 } else {
-                    redirect(servletResponse, "home_page", "/index.jsp");
+                    redirect(servletResponse, HOME_PAGE, DEFAULT_HOME_PAGE);
                 }
             } else {
                 if (user.isNeedInit()) {
-                    redirect(servletResponse, "init_page", "/init.html");
+                    redirect(servletResponse, INIT_PAGE, DEFAULT_INIT_PAGE);
                 } else {
-                    redirect(servletResponse, "login_fail", "/login.html#fail");
+                    redirect(servletResponse, LOGIN_FAIL_PAGE, DEFAULT_LOGIN_FAIL_PAGE);
                 }
             }
             return true;
@@ -135,7 +148,7 @@ public class BootsFilter implements Filter {
          * 将用户名传给jsp
          */
         if (stringWrapper.val().endsWith(".jsp")
-                || stringWrapper.matchFrom0("/api/v1")) {
+                || stringWrapper.matchFrom0(API_V1)) {
             servletRequest.setAttribute("un", user.getUserName());
         }
 
@@ -170,7 +183,7 @@ public class BootsFilter implements Filter {
          * 保护《某些》目录
          */
         if (stringWrapper.matchFrom0(this.matchers)) {
-            redirect(servletResponse, "block_page", "/503.html");
+            redirect(servletResponse, BLOCK_PAGE, DEFAULT_BLOCK_PAGE);
             return true;
         }
 
@@ -178,7 +191,7 @@ public class BootsFilter implements Filter {
          * 系统调试阶段，只有管理员可以进入
          */
         if (SysStatus.isDebugging() && !user.isAdmin()) {
-            redirect(servletResponse, "block_page", "/503.html");
+            redirect(servletResponse, BLOCK_PAGE, DEFAULT_BLOCK_PAGE);
             return true;
         }
 

@@ -3,9 +3,9 @@ package toonly.appobj;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import toonly.boots.ServletUser;
-import toonly.configer.watcher.ChangeWatcher;
 import toonly.configer.PropsConfiger;
 import toonly.configer.cache.UncachedException;
+import toonly.configer.watcher.ChangeWatcher;
 import toonly.dbmanager.permission.DMethod;
 import toonly.dbmanager.permission.P;
 import toonly.dbmanager.permission.PofC;
@@ -21,36 +21,35 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.function.Consumer;
 
-import static toonly.boots.ServletUser.*;
-
 /**
  * Created by cls on 15-3-16.
  */
 public class AppFactory implements ChangeWatcher.ChangeListener {
 
-    private static final Logger log = LoggerFactory.getLogger(AppFactory.class);
-
     public static final AppFactory instance = new AppFactory();
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AppFactory.class);
+    private static final String APP_CFG = "app.cfg";
+
     private final Map<String, Class<?>> map = new HashMap<>();
+    private final PropsConfiger propsConfiger = new PropsConfiger();
+
+    private Properties config = this.getConfig();
 
     private AppFactory() {
         this.putToMap();
     }
 
     private void putToMap() {
-        this._config.forEach((key, whatever) -> this.map.put(key.toString(), this._getAppClass(key.toString())));
+        this.config.forEach((key, whatever) -> this.map.put(key.toString(), this.loadAppClass(key.toString())));
     }
-
-    private static final String APP_CFG = "app.cfg";
-    private final PropsConfiger propsConfiger = new PropsConfiger();
-    private Properties _config = this.getConfig();
 
     private Properties getConfig() {
         this.propsConfiger.watch(APP_CFG).AddChangeListener(this);
         try {
             return propsConfiger.cache(APP_CFG);
         } catch (UncachedException e) {
+            LOGGER.info(e.getLocalizedMessage());
             return propsConfiger.config(APP_CFG);
         }
     }
@@ -61,12 +60,12 @@ public class AppFactory implements ChangeWatcher.ChangeListener {
             return aClass;
         }
 
-        return this._getAppClass(key);
+        return this.loadAppClass(key);
     }
 
-    private Class<?> _getAppClass(String key) {
-        String appClassName = this._config.getProperty(key, "java.lang.Object");
-        Debugger.debugRun(AppFactory.class, () -> log.info("app class name : {}", appClassName));
+    private Class<?> loadAppClass(String key) {
+        String appClassName = this.config.getProperty(key, "java.lang.Object");
+        Debugger.debugRun(AppFactory.class, () -> LOGGER.info("app class name : {}", appClassName));
         try {
             return AppFactory.class.getClassLoader().loadClass(appClassName);
         } catch (ClassNotFoundException e) {
@@ -88,8 +87,8 @@ public class AppFactory implements ChangeWatcher.ChangeListener {
 
     @Override
     public void onChange() {
-        log.info("config [{}] has updated", APP_CFG);
-        this._config = this.propsConfiger.config(APP_CFG);
+        LOGGER.info("config [{}] has updated", APP_CFG);
+        this.config = this.propsConfiger.config(APP_CFG);
         this.putToMap();
         ReposManager.getInstance().needCheck();
     }
@@ -102,15 +101,7 @@ public class AppFactory implements ChangeWatcher.ChangeListener {
         String userP = ServletUser._getPermission(username);
         Class<?> aClass = app.getClass();
 
-        boolean permission = P.S.equals(userP);
-        PofC pofC = aClass.getDeclaredAnnotation(PofC.class);
-        if (!permission && null != pofC) {
-            for (DMethod p : pofC.ps()) {
-                if (p.name().equals(methodName)) {
-                    permission = p.who().contains(userP);
-                }
-            }
-        }
+        boolean permission = checkClassPermission(methodName, userP, aClass);
         try {
             Method method = aClass.getMethod(methodName);
             if (permission) {
@@ -123,11 +114,25 @@ public class AppFactory implements ChangeWatcher.ChangeListener {
                 }
             }
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            BugReporter.reportBug(this, "app["+ aClass.getName()+"] 在 执行调用 的时候，不幸遇难。", e);
+            BugReporter.reportBug(this, "app[" + aClass.getName() + "] 在 执行调用[" + methodName + "] 的时候，不幸遇难。", e);
         }
         if (!permission) {
             return new UnPermissioned();
         }
         return null;
+    }
+
+    private boolean checkClassPermission(String methodName, String userP, Class<?> aClass) {
+        boolean permission = P.S.equals(userP);
+        PofC pofC = aClass.getDeclaredAnnotation(PofC.class);
+        if (!permission && null != pofC) {
+            for (DMethod p : pofC.ps()) {
+                if (p.name().equals(methodName)) {
+                    permission = p.who().contains(userP);
+                    break;
+                }
+            }
+        }
+        return permission;
     }
 }

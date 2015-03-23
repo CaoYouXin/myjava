@@ -22,14 +22,14 @@ public class ReportConfiger implements FileTool, CachedConfiger<ReportConfiger>,
 
     private Cache<MyList> cache = Cache.get(MyList.class);
 
-    private MyList _docs = new MyList();
-    private Map<String, String> _reps = new HashMap<>();
+    private MyList docs = new MyList();
+    private Map<String, String> reps = new HashMap<>();
 
     public ReportConfiger() {
     }
 
     public ReportConfiger report(String key, String value) {
-        this._reps.put(key, value);
+        this.reps.put(key, value);
         return this;
     }
 
@@ -46,18 +46,18 @@ public class ReportConfiger implements FileTool, CachedConfiger<ReportConfiger>,
         }
 
         bufferedReader.lines().forEach((line) -> {
-            this._docs.addAll(Arrays.asList(line.split("%")));
-            this._docs.add("\n");
+            this.docs.addAll(Arrays.asList(line.split("%")));
+            this.docs.add("\n");
         });
-        cache.store(relativePath, this._docs);
+        cache.store(relativePath, this.docs);
         return this;
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        this._docs.stream()
-                .map((doc) -> this._reps.containsKey(doc) ? this._reps.get(doc) : doc)
+        this.docs.stream()
+                .map((doc) -> this.reps.containsKey(doc) ? this.reps.get(doc) : doc)
                 .forEach(sb::append);
         return sb.toString();
     }
@@ -65,7 +65,7 @@ public class ReportConfiger implements FileTool, CachedConfiger<ReportConfiger>,
     @Override
     public ReportConfiger cache(String relativePath) throws UncachedException {
         ReportConfiger reportConfiger = new ReportConfiger();
-        reportConfiger._docs = cache.cache(relativePath);
+        reportConfiger.docs = cache.cache(relativePath);
         return reportConfiger;
     }
 }

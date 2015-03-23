@@ -1,5 +1,7 @@
 package toonly.debugger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import toonly.configer.PropsConfiger;
 import toonly.configer.cache.UncachedException;
 import toonly.configer.watcher.ChangeWatcher;
@@ -13,7 +15,8 @@ import java.util.Properties;
 public class RuleConfiger extends PropsConfiger implements ChangeWatcher.ChangeListener {
 
     public static final RuleConfiger val = new RuleConfiger();
-
+    public static final String CONFIG_FILE_NAME = "debugger.prop";
+    private static final Logger LOGGER = LoggerFactory.getLogger(RuleConfiger.class);
     private RuleListTreeNode _ruleListTree;
 
     public boolean applyRule(String invokerName) {
@@ -55,11 +58,12 @@ public class RuleConfiger extends PropsConfiger implements ChangeWatcher.ChangeL
     }
 
     private Properties get() {
-        this.watch("debugger.prop").AddChangeListener(this);
+        this.watch(CONFIG_FILE_NAME).AddChangeListener(this);
         try {
-            return this.cache("debugger.prop");
+            return this.cache(CONFIG_FILE_NAME);
         } catch (UncachedException e) {
-            return this.config("debugger.prop");
+            LOGGER.info(e.getLocalizedMessage());
+            return this.config(CONFIG_FILE_NAME);
         }
     }
 

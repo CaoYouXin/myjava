@@ -29,7 +29,7 @@ public class Cache<T> implements CachedConfiger<T> {
     public T cache(String relativePath) throws UncachedException {
         T cache = map.get(relativePath);
         if (null == cache) {
-            throw new UncachedException();
+            throw new UncachedException(relativePath);
         }
         return cache;
     }

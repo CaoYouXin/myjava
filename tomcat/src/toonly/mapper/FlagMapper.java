@@ -44,7 +44,7 @@ public class FlagMapper extends HttpServlet {
         try {
             return propsConfiger.cache(CONFIG_FILE_NAME);
         } catch (UncachedException e) {
-            LOGGER.info("file[{}] not cached.", CONFIG_FILE_NAME);
+            LOGGER.info(e.getLocalizedMessage());
             return propsConfiger.config(CONFIG_FILE_NAME);
         }
     }

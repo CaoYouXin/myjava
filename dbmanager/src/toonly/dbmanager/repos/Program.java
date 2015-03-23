@@ -1,5 +1,7 @@
 package toonly.dbmanager.repos;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import toonly.configer.PropsConfiger;
 import toonly.configer.cache.UncachedException;
 import toonly.dbmanager.base.*;
@@ -13,9 +15,24 @@ import java.util.Properties;
  */
 public class Program implements Addable, Modable, Delable, Selable, Creatable {
 
-    public static final Program instance = new Program();
+    public static final Program INSTANCE = new Program();
 
-    private Program() {}
+    private static final Logger LOGGER = LoggerFactory.getLogger(Program.class);
+    private static final String CONFIG_FILE_NAME = "program.repo";
+    private Properties config = this.getConfig();
+    @Column
+    @KeyColumn
+    @DT(type = DT.Type.shorttext)
+    private String name = this.config.getProperty("name", "test");
+    @Column
+    @DuplicatedColumn
+    @DT(type = DT.Type.integer)
+    private int version = Integer.valueOf(this.config.getProperty("version", "0"));
+    private boolean isRegistered = false;
+    private Status status = null;
+
+    private Program() {
+    }
 
     @Override
     public String getSchemaName() {
@@ -27,47 +44,42 @@ public class Program implements Addable, Modable, Delable, Selable, Creatable {
         return RepoConsts.PROGRAM_TB;
     }
 
-    private Properties config = this.getConfig();
-
     private Properties getConfig() {
         PropsConfiger propsConfiger = new PropsConfiger();
         try {
-            return propsConfiger.cache("program.repo");
+            return propsConfiger.cache(CONFIG_FILE_NAME);
         } catch (UncachedException e) {
-            return propsConfiger.config("program.repo");
+            LOGGER.info("file[{}] is not cached.", CONFIG_FILE_NAME);
+            return propsConfiger.config(CONFIG_FILE_NAME);
         }
     }
-
-    @Column @KeyColumn @DT(type = DT.Type.shorttext)
-    private String name = this.config.getProperty("name", "test");
-    @Column @DuplicatedColumn @DT(type = DT.Type.integer)
-    private int version = Integer.valueOf(this.config.getProperty("version", "0"));
 
     public String getName() {
         return name;
     }
-
-    private boolean isRegistered = false;
-    private Status status = null;
 
     public Status getStatus() {
         return status;
     }
 
     public boolean register() {
-        if (null == this.status) this.isRegistered();
+        if (null == this.status) {
+            this.isRegistered();
+        }
 
-        if (this.isRegistered) return true;
+        if (this.isRegistered) {
+            return true;
+        }
 
         switch (this.status) {
-            case NoRepoDB:
+            case NO_REPO_DB:
                 this.createDatabase();
-            case NoProgTb:
+            case NO_PROGRAM_TB:
                 this.createTable();
-            case NoRrogRd:
+            case NO_PROGRAM_RD:
                 this.add();
                 break;
-            case UnUpdtVs:
+            case UN_UPDATE_VS:
                 this.addForDuplicated();
                 break;
             default:
@@ -78,15 +90,17 @@ public class Program implements Addable, Modable, Delable, Selable, Creatable {
     }
 
     public boolean isRegistered() {
-        if (this.isRegistered) return true;
+        if (this.isRegistered) {
+            return true;
+        }
 
         if (!this.isDatabaseExist()) {
-            this.status = Status.NoRepoDB;
+            this.status = Status.NO_REPO_DB;
             return false;
         }
 
         if (!this.isTableExist()) {
-            this.status = Status.NoProgTb;
+            this.status = Status.NO_PROGRAM_TB;
             return false;
         }
 
@@ -94,19 +108,19 @@ public class Program implements Addable, Modable, Delable, Selable, Creatable {
         while (rs.next()) {
             int currentVersion = rs.getInt("version");
             if (currentVersion < this.version) {
-                this.status = Status.UnUpdtVs;
+                this.status = Status.UN_UPDATE_VS;
                 return false;
             } else {
                 this.isRegistered = true;
                 return true;
             }
         }
-        this.status = Status.NoRrogRd;
+        this.status = Status.NO_PROGRAM_RD;
         return false;
     }
 
     public static enum Status {
-        NoRepoDB, NoProgTb, NoRrogRd, UnUpdtVs
+        NO_REPO_DB, NO_PROGRAM_TB, NO_PROGRAM_RD, UN_UPDATE_VS
     }
 
 }

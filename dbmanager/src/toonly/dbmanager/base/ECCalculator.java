@@ -1,6 +1,8 @@
 package toonly.dbmanager.base;
 
 import com.sun.istack.internal.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import toonly.dbmanager.lowlevel.DT;
 
 import java.lang.reflect.Field;
@@ -15,67 +17,51 @@ import java.util.function.BiConsumer;
  */
 public class ECCalculator {
 
-    private final Map<String, Object> _data;
-    private final Map<String, DT> _dataType;
-    private final Entity _source;
-    private final List<String> _duplicatedFs;
-    private final List<String> _keyFs;
-    private final List<String> _notNullFs;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ECCalculator.class);
 
-    private boolean _isScaned = false;
+    private final Map<String, Object> data;
+    private final Map<String, DT> dataType;
+    private final Entity source;
+    private final List<String> duplicatedFs;
+    private final List<String> keyFs;
+    private final List<String> notNullFs;
+
+    private boolean isScaned = false;
 
     public ECCalculator(Entity aEntity) {
-        this._source = aEntity;
-        this._data = new HashMap<>();
-        this._duplicatedFs = new ArrayList<>();
-        this._keyFs = new ArrayList<>();
-        this._notNullFs = new ArrayList<>();
-        this._dataType = new HashMap<>();
+        this.source = aEntity;
+        this.data = new HashMap<>();
+        this.duplicatedFs = new ArrayList<>();
+        this.keyFs = new ArrayList<>();
+        this.notNullFs = new ArrayList<>();
+        this.dataType = new HashMap<>();
     }
 
     private void scan() {
-        if (this._isScaned) return;
+        if (this.isScaned) {
+            return;
+        }
+
         try {
-            scanEC(this._source.getClass());
-            this._isScaned = true;
+            scanEC(this.source.getClass());
+            this.isScaned = true;
         } catch (IllegalAccessException e) {
-            System.err.println("entity class scan failed.");
+            LOGGER.info("entity class scan failed.");
         }
     }
 
     private void scanEC(Class<? extends Entity> aClass) throws IllegalAccessException {
-        if (Entity.class.equals(aClass))
+        if (Entity.class.equals(aClass)) {
             return;
+        }
 
         Field[] declaredFields = aClass.getDeclaredFields();
         for (Field declaredField : declaredFields) {
-            Column declaredAnnotation = declaredField.getDeclaredAnnotation(Column.class);
-            if (null == declaredAnnotation)
+            if (this.readColumn(declaredField)) {
                 continue;
-            boolean accessible = declaredField.isAccessible();
-            declaredField.setAccessible(true);
-            Object value = declaredField.get(this._source);
-            this._data.put(declaredField.getName(), value);
-            if (null == value) {
-                this._notNullFs.add(declaredField.getName());
-            }
-            declaredField.setAccessible(accessible);
-
-            DuplicatedColumn duplicatedColumn = declaredField.getDeclaredAnnotation(DuplicatedColumn.class);
-            if (null != duplicatedColumn) {
-                this._duplicatedFs.add(declaredField.getName());
             }
 
-            KeyColumn keyColumn = declaredField.getDeclaredAnnotation(KeyColumn.class);
-            if (null != keyColumn) {
-                this._keyFs.add(declaredField.getName());
-            }
-
-            DT type = declaredField.getDeclaredAnnotation(DT.class);
-            if (null == type) {
-                throw new RuntimeException("no db type defined");
-            }
-            this._dataType.put(declaredField.getName(), type);
+            this.readAssisted(declaredField);
         }
 
         Class<?> superclass = aClass.getSuperclass();
@@ -84,45 +70,78 @@ public class ECCalculator {
         }
     }
 
+    private boolean readColumn(Field declaredField) throws IllegalAccessException {
+        Column declaredAnnotation = declaredField.getDeclaredAnnotation(Column.class);
+        if (null == declaredAnnotation)
+            return true;
+        boolean accessible = declaredField.isAccessible();
+        declaredField.setAccessible(true);
+        Object value = declaredField.get(this.source);
+        declaredField.setAccessible(accessible);
+        this.data.put(declaredField.getName(), value);
+        if (null != value) {
+            this.notNullFs.add(declaredField.getName());
+        }
+        return false;
+    }
+
+    private void readAssisted(Field declaredField) {
+        DuplicatedColumn duplicatedColumn = declaredField.getDeclaredAnnotation(DuplicatedColumn.class);
+        if (null != duplicatedColumn) {
+            this.duplicatedFs.add(declaredField.getName());
+        }
+
+        KeyColumn keyColumn = declaredField.getDeclaredAnnotation(KeyColumn.class);
+        if (null != keyColumn) {
+            this.keyFs.add(declaredField.getName());
+        }
+
+        DT type = declaredField.getDeclaredAnnotation(DT.class);
+        if (null == type) {
+            throw new RuntimeException("no db type defined");
+        }
+        this.dataType.put(declaredField.getName(), type);
+    }
+
     public void dtForEach(@NotNull BiConsumer<String, DT> biConsumer) {
         scan();
-        this._dataType.forEach(biConsumer);
+        this.dataType.forEach(biConsumer);
     }
 
     public void dataForEach(@NotNull BiConsumer<String, Object> biConsumer) {
         scan();
-        this._data.forEach(biConsumer);
+        this.data.forEach(biConsumer);
     }
 
     public List<String> getFields() {
         scan();
-        return new ArrayList<>(this._data.keySet());
+        return new ArrayList<>(this.data.keySet());
     }
 
     public List<String> getDuplicatedFields() {
         scan();
-        return this._duplicatedFs;
+        return this.duplicatedFs;
     }
 
     public List<String> getKeyFields() {
         scan();
-        return this._keyFs;
+        return this.keyFs;
     }
 
     public List<String> getNotNullFields() {
         scan();
-        return this._notNullFs;
+        return this.notNullFs;
     }
 
     public List<Object> getValues() {
         scan();
-        return new ArrayList<>(this._data.values());
+        return new ArrayList<>(this.data.values());
     }
 
     public List<String> getFieldsExclude(List<String> keyColumns) {
         scan();
-        ArrayList<String> columns = new ArrayList<>(this._data.keySet());
-        keyColumns.forEach((key) -> {
+        ArrayList<String> columns = new ArrayList<>(this.data.keySet());
+        keyColumns.forEach(key -> {
             if (columns.contains(key)) {
                 columns.remove(key);
             }
@@ -133,22 +152,23 @@ public class ECCalculator {
     public List<Object> getValuesInOrder(List<String> columns) {
         scan();
         List<Object> values = new ArrayList<>();
-        columns.forEach((c) -> values.add(this._data.get(c)));
+        columns.forEach(c -> values.add(this.data.get(c)));
         return values;
     }
 
     public boolean setValue(String fieldName, Object value) {
         try {
-            return this.setValue(this._source.getClass(), fieldName, value);
+            return this.setValue(this.source.getClass(), fieldName, value);
         } catch (IllegalAccessException | NoSuchFieldException e) {
-            e.printStackTrace();
+            LOGGER.info("set value failed");
         }
         return false;
     }
 
     private boolean setValue(Class<? extends Entity> aClass, String fieldName, Object value) throws IllegalAccessException, NoSuchFieldException {
-        if (Entity.class.equals(aClass))
+        if (Entity.class.equals(aClass)) {
             return false;
+        }
 
         Field declaredField = aClass.getDeclaredField(fieldName);
         if (null == declaredField) {
@@ -160,7 +180,7 @@ public class ECCalculator {
 
         boolean accessible = declaredField.isAccessible();
         declaredField.setAccessible(true);
-        declaredField.set(this._source, value);
+        declaredField.set(this.source, value);
         declaredField.setAccessible(accessible);
         return true;
     }

@@ -1,15 +1,13 @@
 package toonly.dbmanager.lowlevel;
 
-import toonly.debugger.Debugger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
-import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Queue;
-import java.util.Timer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 
@@ -18,6 +16,9 @@ import java.util.logging.Logger;
  */
 public class DS implements DataSource {
 
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DS.class);
+
+    private final boolean suc;
     private final String url;
     private final String username;
     private final String password;
@@ -33,29 +34,43 @@ public class DS implements DataSource {
         try {
             Class.forName(props.getProperty("driverClassName", "com.mysql.jdbc.Driver"));
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.info("Driver not found.");
+            this.suc = false;
+            return;
         }
 
         this.connections = new ConcurrentLinkedQueue<>();
         this.makeMoreConnections(10);
+        this.suc = true;
+    }
+
+    public boolean isSuc() {
+        return suc;
     }
 
     public void close() {
-        connections.forEach((conn) -> {
+        connections.forEach(conn -> {
             try {
                 conn.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOGGER.info("conn not close correctly.");
             }
         });
+
         try {
             com.mysql.jdbc.AbandonedConnectionCleanupThread.shutdown();
-        } catch (InterruptedException e) {}
+        } catch (InterruptedException e) {
+            LOGGER.info("Abandoned Connection Cleanup Thread not shutdown correctly");
+        }
+
         Enumeration<Driver> drivers = DriverManager.getDrivers();
         try {
-            while (drivers.hasMoreElements())
+            while (drivers.hasMoreElements()) {
                 DriverManager.deregisterDriver(drivers.nextElement());
-        } catch (SQLException e) {}
+            }
+        } catch (SQLException e) {
+            LOGGER.info("Driver not deregister correctly");
+        }
     }
 
     private Properties getConnInfo() {
@@ -68,12 +83,13 @@ public class DS implements DataSource {
 
     @Override
     public String toString() {
-        return "SimpleDataSource{" +
-                "max=" + max +
-                ", connections num=" + connections.size() +
-                ", password='" + password + '\'' +
-                ", username='" + username + '\'' +
+        return "DS{" +
+                "suc=" + suc +
                 ", url='" + url + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", connections=" + connections +
+                ", max=" + max +
                 '}';
     }
 
@@ -90,8 +106,9 @@ public class DS implements DataSource {
      */
     @Override
     public synchronized Connection getConnection() throws SQLException {
-        if (this.connections.isEmpty())
+        if (this.connections.isEmpty()) {
             this.makeMoreConnections(2 * this.max);
+        }
         return new Conn(this, this.connections.poll());
     }
 
@@ -103,7 +120,7 @@ public class DS implements DataSource {
             this.max = newMax;
             return true;
         } catch (SQLException e) {
-            System.err.println("can not make more connections.");
+            LOGGER.info("can not make more connections.");
             return false;
         }
     }
@@ -169,6 +186,8 @@ public class DS implements DataSource {
      * initially null; in other words, the default is for logging to be
      * disabled.
      *
+     * My Data Source did not implement this method.
+     *
      * @param out the new log writer; to disable logging, set to null
      * @throws java.sql.SQLException if a database access error occurs
      * @see #getLogWriter
@@ -176,7 +195,6 @@ public class DS implements DataSource {
      */
     @Override
     public void setLogWriter(PrintWriter out) throws SQLException {
-
     }
 
     /**
@@ -187,6 +205,8 @@ public class DS implements DataSource {
      * When a <code>DataSource</code> object is created, the login timeout is
      * initially zero.
      *
+     * My Data Source did not implement this method.
+     *
      * @param seconds the data source login time limit
      * @throws java.sql.SQLException if a database access error occurs.
      * @see #getLoginTimeout
@@ -194,7 +214,6 @@ public class DS implements DataSource {
      */
     @Override
     public void setLoginTimeout(int seconds) throws SQLException {
-
     }
 
     /**

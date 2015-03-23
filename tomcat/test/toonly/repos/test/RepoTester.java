@@ -15,23 +15,15 @@ public class RepoTester {
     @Test
     public void test() {
         List<String> databases = DB.instance().showDatabases();
-        String schemaName = Program.instance.getSchemaName();
+        String schemaName = Program.INSTANCE.getSchemaName();
         databases.forEach((db) -> System.out.println(db.equals(schemaName)));
         System.out.println(databases.contains(schemaName));
-//        DB.instance().debug(true);
-//        Program.instance.reCreateDatabase();
-//        Program.instance.createTable();
-//        DB.instance().createDatabase("repodb");
-        boolean registered = Program.instance.isRegistered();
+        boolean registered = Program.INSTANCE.isRegistered();
         System.out.println(registered);
-        System.out.println(Program.instance.getStatus());
+        System.out.println(Program.INSTANCE.getStatus());
         if (!registered) {
-//            DB.instance().debug(true);
-            Program.instance.register();
-//            System.out.println(Program.instance.addForDuplicated());
+            Program.INSTANCE.register();
         }
-//        DB.instance().debug(false);
-//        DB.instance().preparedExecute("INSERT INTO `repodb`.`program`(`name`, `version`) VALUES(?, ?)", 1, "storehouse", 0);
     }
 
 }

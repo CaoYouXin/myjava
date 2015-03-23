@@ -31,7 +31,7 @@ public class ReposManager {
             if (this.isUpToDate.get())
                 return true;
 
-            if (!Program.instance.isRegistered())
+            if (!Program.INSTANCE.isRegistered())
                 return false;
 
             SW<Boolean> bool = new SW<>(true);
@@ -67,8 +67,8 @@ public class ReposManager {
             return true;
 
         SW<Boolean> bool = new SW<>(true);
-        if (!Program.instance.isRegistered())
-            bool.val(Program.instance.register());
+        if (!Program.INSTANCE.isRegistered())
+            bool.val(Program.INSTANCE.register());
 
         if (!bool.val())
             return false;

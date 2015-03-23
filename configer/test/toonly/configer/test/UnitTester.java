@@ -1,6 +1,7 @@
 package toonly.configer.test;
 
 import org.junit.Test;
+import toonly.configer.FileTool;
 import toonly.configer.PropsConfiger;
 import toonly.configer.SimpleConfiger;
 import toonly.wrapper.StringWrapper;
@@ -61,6 +62,11 @@ public class UnitTester {
     public void asListTest() {
         List<String> strings = Arrays.asList("a", "b", "a");
         strings.stream().map((str) -> "a".equals(str) ? "c" : str).forEach(System.out::println);
+    }
+
+    @Test
+    public void lineSepTest() {
+        System.out.println("A" + FileTool.LINE_SEPARATOR + "A");
     }
 
     public static void main(String[] args) {

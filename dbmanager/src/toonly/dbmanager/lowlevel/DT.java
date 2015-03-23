@@ -15,6 +15,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface DT {
 
+    @NotNull Type type();
+
     public static enum Type {
         integer("int(11)"),
         bitint("bigint(20)"),
@@ -22,6 +24,7 @@ public @interface DT {
         longtext("varchar(1000)"),
         bool("bit(1)"),
         datetime("datetime");
+
         private String type;
 
         private Type(String type) {
@@ -32,7 +35,5 @@ public @interface DT {
             return type;
         }
     }
-
-    @NotNull Type type();
 
 }

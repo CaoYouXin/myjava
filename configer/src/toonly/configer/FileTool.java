@@ -16,24 +16,23 @@ public interface FileTool {
 
     public static Logger LOGGER = LoggerFactory.getLogger(FileTool.class);
 
-    public static String FILE_SEPARATOR = "file.separator";
+    public static String FILE_SEPARATOR = System.getProperty("file.separator");
+    public static String LINE_SEPARATOR = System.getProperty("line.separator");
 
     public static String getConfigsPath() {
         return getPath(t -> t);
     }
 
     public static String getConfigFilePath(@NotNull String relativePath) {
-        String fileSep = System.getProperty(FILE_SEPARATOR);
-        return getPath(t -> t + fileSep + relativePath);
+        return getPath(t -> t + FILE_SEPARATOR + relativePath);
     }
 
     public static String getPath(@NotNull Function<String, String> fn) {
         String path = new File("").getAbsolutePath();
-        String fileSep = System.getProperty(FILE_SEPARATOR);
         String configs = "configs";
 
-        String name = String.format("%s%s%s", path.substring(0, path.lastIndexOf(fileSep))
-                , fileSep, configs);
+        String name = String.format("%s%s%s", path.substring(0, path.lastIndexOf(FILE_SEPARATOR))
+                , FILE_SEPARATOR, configs);
         File file = new File(name);
         if (file.exists()) {
             return fn.apply(name);
@@ -42,7 +41,7 @@ public interface FileTool {
         Class<FileTool> iConfigerClass = FileTool.class;
         String pathname = iConfigerClass.getResource(
                 new StringWrapper(iConfigerClass.getPackage().getName()).toUpPath().val()
-                        + fileSep + configs).getFile();
+                        + FILE_SEPARATOR + configs).getFile();
         return fn.apply(pathname);
     }
 

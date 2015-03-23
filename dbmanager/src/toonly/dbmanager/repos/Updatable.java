@@ -18,7 +18,7 @@ public interface Updatable extends Creatable {
             return true;
 
         RepoInfo repoInfo = new RepoInfo();
-        repoInfo.setProgram(Program.instance.getName());
+        repoInfo.setProgram(Program.INSTANCE.getName());
         repoInfo.setDb(this.getSchemaName());
         repoInfo.setTable(this.getTableName());
         repoInfo.setVersion(this.getVersion());
@@ -47,7 +47,7 @@ public interface Updatable extends Creatable {
             this.createDatabase();
 
         RepoInfo repoInfo = new RepoInfo();
-        repoInfo.setProgram(Program.instance.getName());
+        repoInfo.setProgram(Program.INSTANCE.getName());
         repoInfo.setDb(this.getSchemaName());
         repoInfo.setTable(this.getTableName());
         repoInfo.setVersion(this.getVersion());

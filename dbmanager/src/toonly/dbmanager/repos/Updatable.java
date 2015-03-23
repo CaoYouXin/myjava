@@ -10,10 +10,11 @@ import toonly.dbmanager.permission.PofM;
  */
 public interface Updatable extends Creatable {
 
-    @JsonIgnore int getVersion();
+    @JsonIgnore
+    int getVersion();
 
     @PofM(who = "S")
-    default boolean needUpdateDDL() {
+    default public boolean needUpdateDDL() {
         if (!this.isDatabaseExist())
             return true;
 
@@ -42,7 +43,7 @@ public interface Updatable extends Creatable {
     }
 
     @PofM(who = "S")
-    default boolean updateDDL() {
+    default public boolean updateDDL() {
         if (!this.isDatabaseExist())
             this.createDatabase();
 

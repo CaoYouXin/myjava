@@ -41,7 +41,7 @@ public class FlagMapper extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (!ReposManager.getInstance().isUpToDate()) {
+        if (!ReposManager.INSTANCE.isUpToDate()) {
             resp.sendRedirect(this.redirectConfiger.getProperty("init_page", "/init.html"));
             return;
         }

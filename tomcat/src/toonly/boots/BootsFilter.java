@@ -157,7 +157,7 @@ public class BootsFilter implements Filter {
          * 升级数据库操作
          */
         if (stringWrapper.matchFrom0("/init.do")) {
-            boolean b = ReposManager.getInstance().makeUpToDate();
+            boolean b = ReposManager.INSTANCE.makeUpToDate();
             RB ret = new RB().put("suc", b);
             FlagMapper.sendResponse(servletResponse, ret);
             if (b) {

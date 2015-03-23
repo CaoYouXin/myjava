@@ -34,7 +34,7 @@
 			return this.each(function() {
 				var self = this;
 
-				/** Create a jGrowl Instance on the Container if it does not exist **/
+				/** Create a jGrowl INSTANCE on the Container if it does not exist **/
 				if ( $(this).data('jGrowl.instance') == undefined ) {
 					$(this).data('jGrowl.instance', $.extend( new $.fn.jGrowl(), { notifications: [], element: null, interval: null } ));
 					$(this).data('jGrowl.instance').startup( this );

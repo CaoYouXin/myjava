@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import toonly.boots.ServletUser;
 import toonly.configer.PropsConfiger;
-import toonly.configer.cache.UncachedException;
 import toonly.configer.watcher.ChangeWatcher;
 import toonly.dbmanager.permission.DMethod;
 import toonly.dbmanager.permission.P;
@@ -80,7 +79,7 @@ public class AppFactory implements ChangeWatcher.ChangeListener {
         LOGGER.info("config [{}] has updated", APP_CFG);
         this.config = this.propsConfiger.config(APP_CFG);
         this.putToMap();
-        ReposManager.getInstance().needCheck();
+        ReposManager.INSTANCE.needCheck();
     }
 
     public void forEach(Consumer<Class<?>> classConsumer) {

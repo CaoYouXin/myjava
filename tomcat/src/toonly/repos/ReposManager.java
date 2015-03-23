@@ -12,16 +12,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Created by cls on 15-3-18.
  */
 public class ReposManager {
-    private static ReposManager ourInstance = new ReposManager();
 
-    public static ReposManager getInstance() {
-        return ourInstance;
-    }
+    public static final ReposManager INSTANCE = new ReposManager();
+
+    private final AtomicBoolean isUpToDate = new AtomicBoolean(false);
 
     private ReposManager() {
     }
-
-    private final AtomicBoolean isUpToDate = new AtomicBoolean(false);
 
     public boolean isUpToDate() {
         if (this.isUpToDate.get())

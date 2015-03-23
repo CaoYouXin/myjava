@@ -45,13 +45,14 @@ public class ReportConfiger implements FileTool, CachedConfiger<ReportConfiger>,
         try {
             bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(this.getFile(relativePath))));
         } catch (FileNotFoundException e) {
+            LOGGER.info("file not found, though it's impossible here.");
         }
 
         if (null == bufferedReader) {
             return null;
         }
 
-        bufferedReader.lines().forEach((line) -> {
+        bufferedReader.lines().forEach(line -> {
             this.docs.addAll(Arrays.asList(line.split("%")));
             this.docs.add("\n");
         });
@@ -63,7 +64,7 @@ public class ReportConfiger implements FileTool, CachedConfiger<ReportConfiger>,
     public String toString() {
         StringBuilder sb = new StringBuilder();
         this.docs.stream()
-                .map((doc) -> this.reps.containsKey(doc) ? this.reps.get(doc) : doc)
+                .map(doc -> this.reps.containsKey(doc) ? this.reps.get(doc) : doc)
                 .forEach(sb::append);
         return sb.toString();
     }

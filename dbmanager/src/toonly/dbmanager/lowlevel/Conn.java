@@ -1514,8 +1514,9 @@ public class Conn implements Connection {
      */
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
-        if (iface.equals(Connection.class))
+        if (iface.equals(Connection.class)) {
             return (T) this.conn;
+        }
         return null;
     }
 
@@ -1536,8 +1537,9 @@ public class Conn implements Connection {
      */
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        if (iface.equals(Connection.class))
+        if (iface.equals(Connection.class)) {
             return true;
+        }
         return false;
     }
 }

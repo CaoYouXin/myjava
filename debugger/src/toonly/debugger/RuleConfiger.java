@@ -1,9 +1,6 @@
 package toonly.debugger;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import toonly.configer.PropsConfiger;
-import toonly.configer.cache.UncachedException;
 import toonly.configer.watcher.ChangeWatcher;
 import toonly.wrapper.Bool;
 
@@ -14,21 +11,24 @@ import java.util.Properties;
  */
 public class RuleConfiger extends PropsConfiger implements ChangeWatcher.ChangeListener {
 
-    public static final RuleConfiger val = new RuleConfiger();
-    public static final String CONFIG_FILE_NAME = "debugger.prop";
-    private RuleListTreeNode _ruleListTree;
+    public static final RuleConfiger INSTANCE = new RuleConfiger();
+
+    private static final String CONFIG_FILE_NAME = "debugger.prop";
+    private static final String DEFAULT_NODE_NAME = "default";
+
+    private RuleListTreeNode ruleListTreeNode;
 
     public boolean applyRule(String invokerName) {
-        if (null == _ruleListTree) {
+        if (null == ruleListTreeNode) {
             init();
         }
 
-        RuleListTreeNode tmp = _ruleListTree;
+        RuleListTreeNode tmp = ruleListTreeNode;
         String invoker = invokerName.toString();
         for (String name : invoker.split("\\.")) {
             tmp = tmp.get(name);
             if (null == tmp) {
-                return _ruleListTree.val();
+                return ruleListTreeNode.val();
             }
         }
 
@@ -36,16 +36,16 @@ public class RuleConfiger extends PropsConfiger implements ChangeWatcher.ChangeL
     }
 
     private synchronized void init() {
-        if (null != _ruleListTree) {
+        if (null != ruleListTreeNode) {
             return;
         }
 
         Properties props = this.watch(CONFIG_FILE_NAME).AddChangeListener(this).cache(CONFIG_FILE_NAME);
 
-        _ruleListTree = new RuleListTreeNode("default", Feature.DEFAULT_RULE.isOn());
+        ruleListTreeNode = new RuleListTreeNode(DEFAULT_NODE_NAME, Feature.DEFAULT_RULE.isOn());
 
         props.forEach((invokerName, isDebugging) -> {
-            RuleListTreeNode tmp = _ruleListTree;
+            RuleListTreeNode tmp = ruleListTreeNode;
             String invoker = invokerName.toString();
             for (String name : invoker.split("\\.")) {
                 tmp = tmp.getOrAdd(name);
@@ -53,14 +53,14 @@ public class RuleConfiger extends PropsConfiger implements ChangeWatcher.ChangeL
             tmp.val(Bool.val((String) isDebugging).val());
         });
 
-        _ruleListTree.print(0);
+        ruleListTreeNode.print(0);
     }
 
     @Override
     public void onChange() {
         Properties props = this.config(CONFIG_FILE_NAME);
 
-        RuleListTreeNode aDefault = new RuleListTreeNode("default", Feature.DEFAULT_RULE.isOn());
+        RuleListTreeNode aDefault = new RuleListTreeNode(DEFAULT_NODE_NAME, Feature.DEFAULT_RULE.isOn());
 
         props.forEach((invokerName, isDebugging) -> {
             RuleListTreeNode tmp = aDefault;
@@ -71,7 +71,7 @@ public class RuleConfiger extends PropsConfiger implements ChangeWatcher.ChangeL
             tmp.val(Bool.val((String) isDebugging).val());
         });
 
-        _ruleListTree = aDefault;
-        _ruleListTree.print(0);
+        ruleListTreeNode = aDefault;
+        ruleListTreeNode.print(0);
     }
 }

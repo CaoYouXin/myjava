@@ -31,7 +31,7 @@ public class Debugger {
             return;
         }
 
-        if (RuleConfiger.val.applyRule(invokerName))
+        if (RuleConfiger.INSTANCE.applyRule(invokerName))
             _exRun(r);
     }
 
@@ -60,7 +60,7 @@ public class Debugger {
             return;
         }
 
-        if (RuleConfiger.val.applyRule(invokerName))
+        if (RuleConfiger.INSTANCE.applyRule(invokerName))
             r.run();
     }
 

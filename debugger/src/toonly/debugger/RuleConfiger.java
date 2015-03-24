@@ -1,5 +1,8 @@
 package toonly.debugger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import toonly.configer.FileTool;
 import toonly.configer.PropsConfiger;
 import toonly.configer.watcher.ChangeWatcher;
 import toonly.wrapper.Bool;
@@ -13,6 +16,7 @@ public class RuleConfiger extends PropsConfiger implements ChangeWatcher.ChangeL
 
     public static final RuleConfiger INSTANCE = new RuleConfiger();
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RuleConfiger.class);
     private static final String CONFIG_FILE_NAME = "debugger.prop";
     private static final String DEFAULT_NODE_NAME = "default";
 
@@ -53,7 +57,9 @@ public class RuleConfiger extends PropsConfiger implements ChangeWatcher.ChangeL
             tmp.val(Bool.val((String) isDebugging).val());
         });
 
-        ruleListTreeNode.print(0);
+        StringBuilder sb = new StringBuilder(FileTool.LINE_SEPARATOR);
+        ruleListTreeNode.print(sb, 0);
+        LOGGER.info(sb.toString());
     }
 
     @Override
@@ -72,6 +78,8 @@ public class RuleConfiger extends PropsConfiger implements ChangeWatcher.ChangeL
         });
 
         ruleListTreeNode = aDefault;
-        ruleListTreeNode.print(0);
+        StringBuilder sb = new StringBuilder(FileTool.LINE_SEPARATOR);
+        ruleListTreeNode.print(sb, 0);
+        LOGGER.info(sb.toString());
     }
 }

@@ -1,10 +1,7 @@
 package toonly.boots;
 
 import com.sun.istack.internal.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import toonly.configer.PropsConfiger;
-import toonly.configer.cache.UncachedException;
 import toonly.dbmanager.lowlevel.DB;
 import toonly.dbmanager.lowlevel.RS;
 import toonly.dbmanager.permission.P;

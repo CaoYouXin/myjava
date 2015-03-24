@@ -1,7 +1,6 @@
 package toonly.configer;
 
 import com.sun.istack.internal.NotNull;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import toonly.wrapper.StringWrapper;
 
@@ -14,10 +13,8 @@ import java.util.function.Function;
  */
 public interface FileTool {
 
-    public static Logger LOGGER = LoggerFactory.getLogger(FileTool.class);
-
-    public static String FILE_SEPARATOR = System.getProperty("file.separator");
-    public static String LINE_SEPARATOR = System.getProperty("line.separator");
+    public static final String FILE_SEPARATOR = System.getProperty("file.separator");
+    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     public static String getConfigsPath() {
         return getPath(t -> t);
@@ -49,9 +46,9 @@ public interface FileTool {
      * 首先查找[myJava]/configs/[relativePath]
      * 然后按照resourcePath查找
      */
-    public default File getFile(@NotNull String relativePath) {
+    default public File getFile(@NotNull String relativePath) {
         String configFilePath = getConfigFilePath(relativePath);
-        LOGGER.info("reading config[{}]", configFilePath);
+        LoggerFactory.getLogger(FileTool.class).info("reading config[{}]", configFilePath);
         return new File(configFilePath);
     }
 

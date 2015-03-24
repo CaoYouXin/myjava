@@ -26,19 +26,19 @@ public interface ParamConstructable extends Entity {
         ecc.dtForEach((f, dt) -> {
             Object o = null;
             switch (dt.type()) {
-                case integer:
+                case INTEGER:
                     o = asT(data, f, (str) -> Integer.valueOf(str));
                     break;
-                case bitint:
+                case LONG:
                     o = asT(data, f, (str) -> Long.valueOf(str));
                     break;
-                case shorttext:case longtext:
+                case SHORTTEXT:case LONGTEXT:
                     o = asT(data, f, (str) -> str);
                     break;
-                case bool:
+                case BOOLEAN:
                     o = asT(data, f, (str) -> Bool.val(str).val());
                     break;
-                case datetime:
+                case DATETIME:
                     //TODO 还要看前端API如何
                     o = asT(data, f, (str) -> LocalDateTime.parse(str, DateTimeFormatter.ISO_DATE_TIME));
                     break;

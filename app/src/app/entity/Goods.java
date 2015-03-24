@@ -10,10 +10,10 @@ import toonly.mapper.ParamConstructable;
  */
 public class Goods implements Updatable, Addable, Delable, Modable, Selable, Jsonable, ParamConstructable {
 
-    @Column @KeyColumn @DT(type = DT.Type.shorttext) private String code;
-    @Column @DuplicatedColumn @DT(type = DT.Type.shorttext) private String name;
-    @Column @DuplicatedColumn @DT(type = DT.Type.shorttext) private String color;
-    @Column @DuplicatedColumn @DT(type = DT.Type.shorttext) private String size;
+    @Column @KeyColumn @DT(type = DT.Type.SHORTTEXT) private String code;
+    @Column @DuplicatedColumn @DT(type = DT.Type.SHORTTEXT) private String name;
+    @Column @DuplicatedColumn @DT(type = DT.Type.SHORTTEXT) private String color;
+    @Column @DuplicatedColumn @DT(type = DT.Type.SHORTTEXT) private String size;
 
     @Override
     public String getSchemaName() {

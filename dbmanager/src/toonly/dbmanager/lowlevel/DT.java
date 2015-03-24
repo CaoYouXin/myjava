@@ -18,12 +18,12 @@ public @interface DT {
     @NotNull Type type();
 
     public static enum Type {
-        integer("int(11)"),
-        bitint("bigint(20)"),
-        shorttext("varchar(100)"),
-        longtext("varchar(1000)"),
-        bool("bit(1)"),
-        datetime("datetime");
+        INTEGER("int(11)"),
+        LONG("bigint(20)"),
+        SHORTTEXT("varchar(100)"),
+        LONGTEXT("varchar(1000)"),
+        BOOLEAN("bit(1)"),
+        DATETIME("datetime");
 
         private String type;
 

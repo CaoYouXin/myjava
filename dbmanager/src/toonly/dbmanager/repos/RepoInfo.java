@@ -9,19 +9,19 @@ import toonly.dbmanager.lowlevel.DT;
 public class RepoInfo implements Creatable, Addable, Selable {
     @Column
     @KeyColumn
-    @DT(type = DT.Type.shorttext)
+    @DT(type = DT.Type.SHORTTEXT)
     private String program;
     @Column
     @KeyColumn
-    @DT(type = DT.Type.shorttext)
+    @DT(type = DT.Type.SHORTTEXT)
     private String db;
     @Column
     @KeyColumn
-    @DT(type = DT.Type.shorttext)
+    @DT(type = DT.Type.SHORTTEXT)
     private String table;
     @Column
     @DuplicatedColumn
-    @DT(type = DT.Type.integer)
+    @DT(type = DT.Type.INTEGER)
     private int version;
 
     @Override

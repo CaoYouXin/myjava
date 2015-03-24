@@ -4,11 +4,19 @@ import com.sun.istack.internal.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Created by caoyouxin on 15-1-22.
  */
 public class ExpressionGroup implements Expression {
+
+    public static final String INNER_STATE_ERROR = "inner state error.";
+    public static final String MULTI_EXPRESSIONS = "(%s%s)";
+    public static final String SINGLE_EXPRESSION = "(%s)";
+    public static final String AND = "&&";
+    public static final String OR = "||";
+    public static final String BLANK = " ";
 
     private Expression first;
     private List<Boolean> isAndOrOrs;
@@ -34,42 +42,30 @@ public class ExpressionGroup implements Expression {
 
     @Override
     public String toSql() {
-        if (null == this.follows) {
-            return String.format("(%s)", this.first.toSql());
-        }
-        return String.format("(%s%s)", this.first.toSql(), this.appendExpressionsToSql());
-    }
-
-    private String appendExpressionsToSql() {
-        if (this.follows.size() != this.isAndOrOrs.size()) {
-            throw new BuildException("inner state error.");
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < this.follows.size(); i++) {
-            sb.append(" ").append(this.isAndOrOrs.get(i) ? "&&" : "||")
-                    .append(" ").append(this.follows.get(i).toSql());
-        }
-        return sb.toString();
+        return this.sql(SQL::toSql);
     }
 
     @Override
     public String toPreparedSql() {
-        if (null == this.follows) {
-            return String.format("(%s)", this.first.toPreparedSql());
-        }
-        return String.format("(%s%s)", this.first.toPreparedSql(), this.appendExpressionsToPreparedSql());
+        return this.sql(PreparedSQL::toPreparedSql);
     }
 
-    private String appendExpressionsToPreparedSql() {
+    private String sql(Function<Expression, String> toSQL) {
+        if (null == this.follows) {
+            return String.format(SINGLE_EXPRESSION, toSQL.apply(this.first));
+        }
+        return String.format(MULTI_EXPRESSIONS, toSQL.apply(this.first), this.append(toSQL));
+    }
+
+    private String append(Function<Expression, String> toSQL) {
         if (this.follows.size() != this.isAndOrOrs.size()) {
-            throw new BuildException("inner state error.");
+            throw new BuildException(INNER_STATE_ERROR);
         }
 
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < this.follows.size(); i++) {
-            sb.append(" ").append(this.isAndOrOrs.get(i) ? "&&" : "||")
-                    .append(" ").append(this.follows.get(i).toPreparedSql());
+            sb.append(BLANK).append(this.isAndOrOrs.get(i) ? AND : OR)
+                    .append(BLANK).append(toSQL.apply(this.follows.get(i)));
         }
         return sb.toString();
     }

@@ -5,13 +5,18 @@ import toonly.wrapper.StringWrapper;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Created by cls on 15-3-13.
  */
 public class Select extends Delete implements SQL, PreparedSQL {
 
-    @Nullable private List<String> targets;
+    private static final String BASIC_SELECT = "SELECT %s FROM %s";
+    private static final String SOMETHING = " %s";
+
+    @Nullable
+    private List<String> targets;
 
     public Select(TableId tableId) {
         super(tableId);
@@ -28,17 +33,25 @@ public class Select extends Delete implements SQL, PreparedSQL {
     }
 
     @Override
+    public Select where(Where where) {
+        return (Select) super.where(where);
+    }
+
+    @Override
     public String toPreparedSql() {
-        if (null == this.where)
-            return String.format("SELECT %s FROM %s", this.getTargets(), this.tableId.toSql());
-        return String.format("SELECT %s  FROM %s %s", this.getTargets(), this.tableId.toSql(), this.where.toPreparedSql());
+        return this.sql(PreparedSQL::toPreparedSql);
     }
 
     @Override
     public String toSql() {
-        if (null == this.where)
-            return String.format("SELECT %s FROM %s", this.getTargets(), this.tableId.toSql());
-        return String.format("SELECT %s  FROM %s %s", this.getTargets(), this.tableId.toSql(), this.where.toSql());
+        return this.sql(SQL::toSql);
+    }
+
+    private String sql(Function<Where, String> fn) {
+        if (null == this.where) {
+            return String.format(BASIC_SELECT, this.getTargets(), this.tableId.toSql());
+        }
+        return String.format(BASIC_SELECT + SOMETHING, this.getTargets(), this.tableId.toSql(), fn.apply(this.where));
     }
 
     private String getTargets() {

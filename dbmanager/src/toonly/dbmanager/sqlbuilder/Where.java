@@ -7,6 +7,8 @@ import toonly.wrapper.StringWrapper;
  */
 public class Where extends ExpressionGroup implements SQL {
 
+    private static final String WHERE_EXPRESSION = "WHERE %s";
+
     public Where(Expression expression) {
         super(expression);
     }
@@ -18,11 +20,11 @@ public class Where extends ExpressionGroup implements SQL {
 
     @Override
     public String toSql() {
-        return String.format("WHERE %s", new StringWrapper(super.toSql()).unwrap().val());
+        return String.format(WHERE_EXPRESSION, new StringWrapper(super.toSql()).unwrap().val());
     }
 
     @Override
     public String toPreparedSql() {
-        return String.format("WHERE %s", new StringWrapper(super.toPreparedSql()).unwrap().val());
+        return String.format(WHERE_EXPRESSION, new StringWrapper(super.toPreparedSql()).unwrap().val());
     }
 }

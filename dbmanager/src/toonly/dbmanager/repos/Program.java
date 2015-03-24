@@ -21,11 +21,11 @@ public class Program implements Addable, Modable, Delable, Selable, Creatable {
     private Properties config = new PropsConfiger().cache(CONFIG_FILE_NAME);
     @Column
     @KeyColumn
-    @DT(type = DT.Type.shorttext)
+    @DT(type = DT.Type.SHORTTEXT)
     private String name = this.config.getProperty("name", "test");
     @Column
     @DuplicatedColumn
-    @DT(type = DT.Type.integer)
+    @DT(type = DT.Type.INTEGER)
     private int version = Integer.valueOf(this.config.getProperty("version", "0"));
     private boolean isRegistered = false;
     private Status status = null;

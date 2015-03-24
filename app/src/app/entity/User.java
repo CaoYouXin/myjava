@@ -10,9 +10,9 @@ import toonly.mapper.ParamConstructable;
  */
 public class User implements Updatable, Addable, Delable, Modable, Selable, Jsonable, ParamConstructable {
 
-    @Column @KeyColumn @DT(type = DT.Type.integer)
+    @Column @KeyColumn @DT(type = DT.Type.INTEGER)
     private int id;
-    @Column @DuplicatedColumn @DT(type = DT.Type.shorttext)
+    @Column @DuplicatedColumn @DT(type = DT.Type.SHORTTEXT)
     private String name;
 
     public User(int id, String name) {

@@ -52,20 +52,20 @@ public interface Jsonable extends Entity {
     public static void setValue(ECCalculator ecc, String f, DT dt, JsonNode jsonNode) {
         Object o = null;
         switch (dt.type()) {
-            case integer:
+            case INTEGER:
                 o = jsonNode.asInt();
                 break;
-            case bitint:
+            case LONG:
                 o = jsonNode.asLong();
                 break;
-            case shorttext:
-            case longtext:
+            case SHORTTEXT:
+            case LONGTEXT:
                 o = jsonNode.asText();
                 break;
-            case bool:
+            case BOOLEAN:
                 o = jsonNode.asBoolean();
                 break;
-            case datetime:
+            case DATETIME:
                 //TODO 还要看前端API如何
                 o = LocalDateTime.parse(jsonNode.asText(), DateTimeFormatter.ISO_DATE_TIME);
                 break;

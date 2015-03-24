@@ -18,6 +18,9 @@ import java.util.Map;
  */
 public class RB {
 
+    public static final String RB_KEY_SUC = "suc";
+    public static final String RB_KEY_PROBLEM = "problem";
+
     private Map<String, Object> normalData;
 
     public RB put(String suc, boolean b) {

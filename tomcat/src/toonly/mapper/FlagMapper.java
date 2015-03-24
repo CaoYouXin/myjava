@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import toonly.appobj.AppFactory;
 import toonly.appobj.UnPermissioned;
 import toonly.configer.PropsConfiger;
-import toonly.configer.cache.UncachedException;
 import toonly.dbmanager.base.Jsonable;
 import toonly.dbmanager.lowlevel.RS;
 import toonly.debugger.Debugger;
@@ -24,9 +23,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.Properties;
+import java.util.*;
+
+import static toonly.mapper.ret.RB.RB_KEY_PROBLEM;
+import static toonly.mapper.ret.RB.RB_KEY_SUC;
 
 /**
  * Created by caoyouxin on 15-2-25.
@@ -36,6 +36,7 @@ public class FlagMapper extends HttpServlet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FlagMapper.class);
     private static final String CONFIG_FILE_NAME = "redirect.prop";
+
     private ThreadLocal<String> line1 = new ThreadLocal<>();
     private Properties redirectConfiger = new PropsConfiger().cache(CONFIG_FILE_NAME);
 
@@ -100,60 +101,67 @@ public class FlagMapper extends HttpServlet {
             sendResponse(resp, this.buildRB(false, "unpermissioned", null));
         }
 
+        Set<Boolean> booleanSet = new HashSet<>();
         switch (info) {
             case "entity":
-                this.handleEntity(resp, invokeRet);
+                booleanSet.add(this.handleBoolean(resp, invokeRet));
+                booleanSet.add(this.handleRS(resp, invokeRet));
                 break;
             case "func":
-                this.handleFunction(resp, invokeRet);
+                booleanSet.add(this.handleBoolean(resp, invokeRet));
                 break;
             default:
-                sendResponse(resp, this.buildRB(false, "nonsense", null));
+                booleanSet.add(false);
         }
-    }
-
-    private void handleFunction(HttpServletResponse resp, Object invokeRet) throws IOException {
-        if (invokeRet instanceof Boolean) {
-            sendResponse(resp, this.buildRB((boolean) invokeRet, null, null));
-        } else {
+        if (!booleanSet.contains(true)) {
             sendResponse(resp, this.buildRB(false, "nonsense", null));
         }
     }
 
-    private void handleEntity(HttpServletResponse resp, Object invokeRet) throws IOException {
+    private boolean handleBoolean(HttpServletResponse resp, Object invokeRet) throws IOException {
         if (invokeRet instanceof Boolean) {
             sendResponse(resp, this.buildRB((boolean) invokeRet, null, null));
-        } else if (invokeRet instanceof RS) {
-            sendResponse(resp, this.buildRB((RS) invokeRet));
-        } else {
-            sendResponse(resp, this.buildRB(false, "nonsense", null));
+            return true;
         }
+        return false;
     }
 
-    private RB buildRB(RS invokeRet) {
-        RB ret = new RB();
+    private boolean handleRS(HttpServletResponse resp, Object invokeRet) throws IOException {
+        if (invokeRet instanceof RS) {
+            RS rs = (RS) invokeRet;
 
-        if (invokeRet.isEmpty())
-            return ret.put("suc", Bool.FALSE.toString());
+            if (rs.isEmpty()) {
+                sendResponse(resp, this.buildRB(false, "empty rs", null));
+                return true;
+            }
 
-        RBArray array = new RBArray();
-        while (invokeRet.next()) {
-            RB rb = new RB();
-            invokeRet.forEach((key, value) -> rb.put(key, value.toString()));
-            array.add(rb);
+            RB ret = new RB();
+            RBArray array = new RBArray();
+            while (rs.next()) {
+                RB rb = new RB();
+                rs.forEach((key, value) -> rb.put(key, value.toString()));
+                array.add(rb);
+            }
+            sendResponse(resp, ret.put(RB_KEY_SUC, Bool.TRUE.toString()).put("data", array));
+            return true;
         }
-        return ret.put("suc", Bool.TRUE.toString()).put("data", array);
+        return false;
     }
 
     private RB buildRB(boolean suc, String problem, Exception e) {
         RB ret = new RB();
 
         if (suc) {
-            return ret.put("suc", Bool.TRUE.toString());
-        } else if (null != e) {
-            return ret.put("suc", Bool.FALSE.toString()).put("problem", String.format("%s %s", problem, e.getMessage()));
+            return ret.put(RB_KEY_SUC, Bool.TRUE.toString());
+        }
+        if (null != problem) {
+            if (null != e) {
+                return ret.put(RB_KEY_SUC, Bool.FALSE.toString()).put(RB_KEY_PROBLEM, String.format("%s %s", problem, e.getMessage()));
+            } else {
+                return ret.put(RB_KEY_SUC, Bool.FALSE.toString()).put(RB_KEY_PROBLEM, problem);
+            }
         } else {
-            return ret.put("suc", Bool.FALSE.toString()).put("problem", problem);
+            return ret.put(RB_KEY_SUC, Bool.FALSE.toString());
         }
     }
 

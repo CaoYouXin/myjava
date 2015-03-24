@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Properties;
 
 import static toonly.boots.ServletUser._login;
+import static toonly.mapper.ret.RB.RB_KEY_PROBLEM;
+import static toonly.mapper.ret.RB.RB_KEY_SUC;
 
 
 /**
@@ -175,9 +177,9 @@ public class BootsFilter implements Filter {
     }
 
     private void updateDBFail(Exception e, HttpServletResponse servletResponse) throws IOException {
-        RB ret = new RB().put("suc", false);
+        RB ret = new RB().put(RB_KEY_SUC, false);
         if (e instanceof UnPermissioned) {
-            FlagMapper.sendResponse(servletResponse, ret.put("msg", "unp"));
+            FlagMapper.sendResponse(servletResponse, ret.put(RB_KEY_PROBLEM, "unpermissioned"));
         } else if (e instanceof InvokeAppError) {
             servletResponse.sendError(500);
         }

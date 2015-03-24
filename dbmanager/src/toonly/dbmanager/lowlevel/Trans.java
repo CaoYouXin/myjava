@@ -9,11 +9,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
- *
  * @author CPU
  */
 public interface Trans {
 
-	void trans(Connection conn) throws SQLException;
+    void trans(Connection conn) throws SQLException;
 
 }

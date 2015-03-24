@@ -10,6 +10,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Cache<T> implements CachedConfiger<T> {
 
     private static final Map<Class<?>, Cache<?>> cacheCache = new HashMap<>();
+    private final Map<String, T> map = new ConcurrentHashMap<>();
+
+    private Cache() {
+    }
 
     public synchronized static <R> Cache<R> get(Class<R> rClass) {
         Cache<?> cache = cacheCache.get(rClass);
@@ -19,11 +23,6 @@ public class Cache<T> implements CachedConfiger<T> {
         cacheCache.put(rClass, cache);
         return (Cache<R>) cache;
     }
-
-    private Cache() {
-    }
-
-    private final Map<String, T> map = new ConcurrentHashMap<>();
 
     @Override
     public T cache(String relativePath) throws UncachedException {

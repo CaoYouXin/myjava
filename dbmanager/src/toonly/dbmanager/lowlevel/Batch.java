@@ -7,11 +7,10 @@
 package toonly.dbmanager.lowlevel;
 
 /**
- *
  * @author CPU
  */
 public interface Batch {
-	
-	Object[] row(int rowId);
-	
+
+    Object[] row(int rowId);
+
 }

@@ -20,6 +20,7 @@ public class PropsConfiger implements FileTool, CachedConfiger<Properties>, Simp
     private static final Logger LOGGER = LoggerFactory.getLogger(PropsConfiger.class);
 
     private final Cache<Properties> cache = Cache.get(Properties.class);
+    private ChangeWatcherSupport<PropsConfiger> support = new ChangeWatcherSupport<>(this);
 
     @Override
     public Properties cache(String relativePath) {
@@ -42,8 +43,6 @@ public class PropsConfiger implements FileTool, CachedConfiger<Properties>, Simp
         cache.store(relativePath, props);
         return props;
     }
-
-    private ChangeWatcherSupport<PropsConfiger> support = new ChangeWatcherSupport<>(this);
 
     @Override
     public PropsConfiger AddChangeListener(ChangeListener listener) {

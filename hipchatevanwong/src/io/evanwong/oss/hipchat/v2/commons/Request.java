@@ -18,18 +18,18 @@ import java.util.concurrent.Future;
 
 public abstract class Request<T> {
 
-    private static final Logger log = LoggerFactory.getLogger(Request.class);
-
     protected static final String BASE_URL = "https://api.hipchat.com/v2";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Request.class);
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    protected final ObjectWriter objectWriter = objectMapper.writer();
+    protected final ObjectReader objectReader = objectMapper.reader(getParameterClass());
+
     protected ExecutorService executorService;
     protected String accessToken;
     protected HttpClient httpClient;
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    protected final ObjectWriter objectWriter = objectMapper.writer();
-    protected final ObjectReader objectReader = objectMapper.reader(getParameterClass());
-    protected abstract Map<String, Object> toQueryMap();
-    protected abstract HttpResponse request() throws IOException;
-    protected abstract String getPath();
 
     protected Request(String accessToken, HttpClient httpClient, ExecutorService executorService) {
         this.executorService = executorService;
@@ -37,9 +37,14 @@ public abstract class Request<T> {
         this.httpClient = httpClient;
     }
 
-    public Future<T> execute() {
+    protected abstract Map<String, Object> toQueryMap();
 
-        Future<T> future = executorService.submit(() -> {
+    protected abstract HttpResponse request() throws IOException;
+
+    protected abstract String getPath();
+
+    public Future<T> execute() {
+        return executorService.submit(() -> {
             HttpResponse response = request();
             int status = response.getStatusLine().getStatusCode();
             HttpEntity entity = response.getEntity();
@@ -51,11 +56,10 @@ public abstract class Request<T> {
                 }
                 return objectReader.readValue(content);
             } else {
-                log.error("Invalid response status: {}, content: {}", status, content);
+                LOGGER.error("Invalid response status: {}, content: {}", status, content);
                 return null;
             }
         });
-        return future;
     }
 
     protected Class<T> getParameterClass() {

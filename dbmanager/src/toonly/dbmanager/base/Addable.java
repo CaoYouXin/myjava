@@ -29,7 +29,7 @@ public interface Addable extends Entity {
         DuplicatedUpdate insert = new DuplicatedUpdate(tableId, fields);
 
         List<String> setFields = ecc.getDuplicatedFields();
-        setFields.forEach((f) -> insert.set(new Equal(tableId, f)));
+        setFields.forEach(f -> insert.set(new Equal(tableId, f)));
         setFields.addAll(0, fields);
 
         PreparedSQL pSQL = insert::toPreparedSql;

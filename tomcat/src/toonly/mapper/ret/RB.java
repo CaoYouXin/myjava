@@ -18,33 +18,33 @@ import java.util.Map;
  */
 public class RB {
 
-    private Map<String, Object> _normal_data;
+    private Map<String, Object> normalData;
 
     public RB put(String suc, boolean b) {
         return this.put(suc, (b ? Bool.TRUE : Bool.FALSE).toString());
     }
 
     public RB put(String key, String value) {
-        return this._put(key, value);
+        return this.putObject(key, value);
     }
 
     public RB put(String key, int value) {
-        return this._put(key, value);
+        return this.putObject(key, value);
     }
 
     public RB put(String key, RB value) {
-        return this._put(key, value);
+        return this.putObject(key, value);
     }
 
     public RB put(String key, RBArray array) {
-        return this._put(key, array);
+        return this.putObject(key, array);
     }
 
-    private RB _put(String key, Object value) {
-        if (null == this._normal_data) {
-            this._normal_data = new HashMap<>();
+    private RB putObject(String key, Object value) {
+        if (null == this.normalData) {
+            this.normalData = new HashMap<>();
         }
-        this._normal_data.put(key, value);
+        this.normalData.put(key, value);
         return this;
     }
 
@@ -63,12 +63,12 @@ public class RB {
 
     private Map<String, JsonNode> getTreeNode(RB builder) {
         Map<String, JsonNode> nodes = new HashMap<>();
-        builder._normal_data.forEach((key, value) -> {
+        builder.normalData.forEach((key, value) -> {
             if (value instanceof RB) {
                 nodes.put(key, new ObjectNode(JsonNodeFactory.instance, getTreeNode((RB) value)));
             } else if (value instanceof RBArray) {
                 ArrayNode jsonNodes = new ArrayNode(JsonNodeFactory.instance);
-                ((RBArray) value).forEach((rb) -> jsonNodes.add(new ObjectNode(JsonNodeFactory.instance, getTreeNode(rb))));
+                ((RBArray) value).forEach(rb -> jsonNodes.add(new ObjectNode(JsonNodeFactory.instance, getTreeNode(rb))));
                 nodes.put(key, jsonNodes);
             } else if (value instanceof String) {
                 nodes.put(key, new TextNode((String) value));

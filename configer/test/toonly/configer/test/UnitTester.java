@@ -1,6 +1,7 @@
 package toonly.configer.test;
 
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 import toonly.configer.FileTool;
 import toonly.configer.PropsConfiger;
 import toonly.configer.SimpleConfiger;
@@ -77,6 +78,16 @@ public class UnitTester {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void logTest() {
+        Map<String, String[]> map = new HashMap<>();
+        map.put("a", new String[]{ "a1", "a2" });
+        map.put("b", new String[]{ "b1", "b2" });
+        Map<String, List<String>> printMap = new HashMap();
+        map.forEach((k, l) -> printMap.put(k, Arrays.asList(l)));
+        LoggerFactory.getLogger("printer").info("{}", printMap);
     }
 
 }

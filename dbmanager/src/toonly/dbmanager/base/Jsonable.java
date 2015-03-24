@@ -3,7 +3,6 @@ package toonly.dbmanager.base;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import toonly.dbmanager.lowlevel.DT;
 import toonly.wrapper.SW;
@@ -38,9 +37,9 @@ public interface Jsonable extends Entity {
             JsonNode jsonNode = finalRoot.get(f);
             if (null != jsonNode) {
                 setValue(ecc, f, dt, jsonNode);
-            } else {
+            } else if (suc.val()) {
                 LoggerFactory.getLogger(Jsonable.class).info("cannot read completely from json : {} , field : {}", json, f);
-                if (suc.val()) suc.val(false);
+                suc.val(false);
             }
         });
 

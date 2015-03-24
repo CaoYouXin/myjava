@@ -1,14 +1,13 @@
 package toonly.repos;
 
 import toonly.appobj.AppFactory;
-import toonly.appobj.InvokeAppError;
-import toonly.appobj.UnPermissioned;
 import toonly.dbmanager.repos.Program;
 import toonly.dbmanager.repos.Updatable;
 import toonly.debugger.BugReporter;
 import toonly.wrapper.SW;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 /**
  * Created by cls on 15-3-18.
@@ -24,7 +23,7 @@ public class ReposManager {
     private ReposManager() {
     }
 
-    public boolean isUpToDate() {
+    public boolean isUpToDate() throws Exception {
         if (this.isUpToDate.get()) {
             return true;
         }
@@ -39,6 +38,7 @@ public class ReposManager {
             }
 
             SW<Boolean> bool = new SW<>(true);
+            SW<Exception> e = new SW<>();
             AppFactory.instance.forEach(appClass -> {
                 if (!bool.val()) {
                     return;
@@ -47,25 +47,25 @@ public class ReposManager {
                 Object app = AppFactory.instance.getAppObject(appClass);
                 if (app instanceof Updatable) {
                     Object ret = AppFactory.instance.invokeMethod(null, app, "needUpdateDDL");
-                    if (!(ret instanceof InvokeAppError)) {
-                        bool.val(false);
-                    } else {
-                        bool.val((Boolean) ret);
-                    }
+                    this.handleRetInner(bool, e, ret);
                 }
             });
 
-            if (bool.val()) {
-                this.isUpToDate.set(true);
-                return true;
-            }
-            return false;
+            return this.handleRetOuter(e, () -> {
+                if (bool.val()) {
+                    this.isUpToDate.set(true);
+                    return true;
+                } else {
+                    return false;
+                }
+            });
         }
     }
 
     public synchronized boolean makeUpToDate(String username) throws Exception {
-        if (this.isUpToDate.get())
+        if (this.isUpToDate.get()) {
             return true;
+        }
 
         SW<Boolean> bool = new SW<>(true);
         if (!Program.INSTANCE.isRegistered()) {
@@ -85,17 +85,27 @@ public class ReposManager {
             Object app = AppFactory.instance.getAppObject(appClass);
             if (app instanceof Updatable) {
                 Object ret = AppFactory.instance.invokeMethod(username, app, "updateDDL");
-                if (ret instanceof Boolean) {
-                    bool.val((Boolean) ret);
-                } else {
-                    e.val((Exception) ret);
-                    bool.val(false);
-                }
+                this.handleRetInner(bool, e, ret);
             }
         });
-        if (e.isNull()) {
-            return bool.val();
+
+        return handleRetOuter(e, bool::val);
+    }
+
+    private void handleRetInner(SW<Boolean> bool, SW<Exception> e, Object ret) {
+        if (ret instanceof Boolean) {
+            bool.val((Boolean) ret);
         } else {
+            e.val((Exception) ret);
+            bool.val(false);
+        }
+    }
+
+    private boolean handleRetOuter(SW<Exception> e, Supplier<Boolean> fn) throws Exception {
+        if (e.isNull()) {
+            return fn.get();
+        } else {
+            BugReporter.reportBug(this, MSG, e.val());
             throw e.val();
         }
     }

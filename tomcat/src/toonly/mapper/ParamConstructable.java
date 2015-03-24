@@ -1,6 +1,5 @@
 package toonly.mapper;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import toonly.dbmanager.base.ECCalculator;
 import toonly.dbmanager.base.Entity;
@@ -9,6 +8,9 @@ import toonly.wrapper.SW;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -43,8 +45,12 @@ public interface ParamConstructable extends Entity {
                 default:
                     LoggerFactory.getLogger(ParamConstructable.class).info("no such data type");
             }
-            if (null != o) ecc.setValue(f, o);
-            else if (suc.val()) {
+            if (null != o) {
+                ecc.setValue(f, o);
+            } else if (suc.val()) {
+                Map<String, List<String>> printMap = new HashMap();
+                data.forEach((k, l) -> printMap.put(k, Arrays.asList(l)));
+                LoggerFactory.getLogger(ParamConstructable.class).info("cannot read completely from params : {}", printMap);
                 suc.val(false);
             }
         });

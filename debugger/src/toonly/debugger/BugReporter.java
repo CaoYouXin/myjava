@@ -4,8 +4,6 @@ import io.evanwong.oss.hipchat.v2.HipChatClient;
 import io.evanwong.oss.hipchat.v2.rooms.MessageColor;
 import io.evanwong.oss.hipchat.v2.rooms.MessageFormat;
 import io.evanwong.oss.hipchat.v2.rooms.SendRoomNotificationRequestBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import toonly.configer.ReportConfiger;
 
 import java.util.Objects;
@@ -19,6 +17,9 @@ public class BugReporter {
     private static final HipChatClient HIPCHAT_CLIENT = new HipChatClient(DEFAULT_ACCESS_TOKEN);
     private static final ReportConfiger REPORT_CONFIGER_HOOK = new ReportConfiger();
 
+    private BugReporter() {
+    }
+
     public static final void closeClient() {
         HIPCHAT_CLIENT.close();
     }
@@ -28,7 +29,7 @@ public class BugReporter {
     }
 
     public static void reportBug(Object invoker, String msg, Exception e) {
-        _reportBug(invoker.getClass().getName(), msg, e);
+        reportBugByName(invoker.getClass().getName(), msg, e);
     }
 
     public static final void reportBug(Class<?> invoker, String msg) {
@@ -36,10 +37,10 @@ public class BugReporter {
     }
 
     public static void reportBug(Class<?> invoker, String msg, Exception e) {
-        _reportBug(invoker.getName(), msg, e);
+        reportBugByName(invoker.getName(), msg, e);
     }
 
-    private static void _reportBug(String name, String msg, Exception e) {
+    private static void reportBugByName(String name, String msg, Exception e) {
         StringBuilder sb = null;
         if (null != e) {
             sb = new StringBuilder(Objects.toString(e.getMessage(), "没有异常信息")).append("\n");

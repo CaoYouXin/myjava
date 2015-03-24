@@ -8,60 +8,58 @@ import org.slf4j.LoggerFactory;
  */
 public class Debugger {
 
-    private static final Logger log = LoggerFactory.getLogger(Debugger.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Debugger.class);
 
-    public static interface ExRunnable<E extends Exception> {
-        void exRun() throws E;
+    private Debugger() {
     }
 
     public static final void debugExRun(Object invoker, ExRunnable r) {
-        _debugRun(invoker.getClass().getName(), r);
+        debugByName(invoker.getClass().getName(), null, r);
     }
 
     public static final void debugExRun(Class<?> invoker, ExRunnable r) {
-        _debugRun(invoker.getName(), r);
-    }
-
-    private static final void _debugRun(String invokerName, ExRunnable r) {
-        if (Feature.LOW_LEVEL_FLAG.isOn())
-            log.info("Invoker Name : {}", invokerName);
-
-        if (Feature.SIMPLE_MODE.isOn() && Feature.SIMPLE_MODE_RULE.isOn()) {
-            _exRun(r);
-            return;
-        }
-
-        if (RuleConfiger.INSTANCE.applyRule(invokerName))
-            _exRun(r);
-    }
-
-    private static final void _exRun(ExRunnable r) {
-        try {
-            r.exRun();
-        } catch (Exception e) {
-            log.info("Error occur : {}", e.getMessage());
-        }
+        debugByName(invoker.getName(), null, r);
     }
 
     public static final void debugRun(Object invoker, Runnable r) {
-        _debugRun(invoker.getClass().getName(), r);
+        debugByName(invoker.getClass().getName(), r, null);
     }
 
     public static final void debugRun(Class<?> invoker, Runnable r) {
-        _debugRun(invoker.getName(), r);
+        debugByName(invoker.getName(), r, null);
     }
 
-    private static final void _debugRun(String invokerName, Runnable r) {
-        if (Feature.LOW_LEVEL_FLAG.isOn())
-            log.info("Invoker Name : {}", invokerName);
+    private static final void debugByName(String invokerName, Runnable r, ExRunnable er) {
+        if (Feature.LOW_LEVEL_FLAG.isOn()) {
+            LOGGER.info("Invoker Name : {}", invokerName);
+        }
 
         if (Feature.SIMPLE_MODE.isOn() && Feature.SIMPLE_MODE_RULE.isOn()) {
-            r.run();
+            debug(r, er);
             return;
         }
 
-        if (RuleConfiger.INSTANCE.applyRule(invokerName))
+        if (RuleConfiger.INSTANCE.applyRule(invokerName)) {
+            debug(r, er);
+        }
+    }
+
+    private static void debug(Runnable r, ExRunnable er) {
+        if (null != r) {
             r.run();
+            return;
+        }
+        if (null != er) {
+            try {
+                er.exRun();
+            } catch (Exception e) {
+                LOGGER.info("Error[{}] occur : {}", e.getClass().getName(), e.getLocalizedMessage());
+            }
+        }
+    }
+
+    public static interface ExRunnable<E extends Exception> {
+        void exRun() throws E;
     }
 
 }

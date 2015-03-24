@@ -17,9 +17,15 @@ public class UserSelecter {
 
     private static final String CONFIG_FILE_NAME = "user.cfg";
     private static final Properties CONFIGS = new PropsConfiger().cache(CONFIG_FILE_NAME);
-    private static final String USERNAME_FIELD = CONFIGS.getProperty("username", "username");
-    private static final String PASSWORD_FIELD = CONFIGS.getProperty("password", "password");
-    private static final String PERMISSION_FIELD = CONFIGS.getProperty("permission", "permission");
+    private static final String USERNAME_KEY = "username";
+    private static final String DEFAULT_USERNAME_VALUE = USERNAME_KEY;
+    private static final String USERNAME_FIELD = CONFIGS.getProperty(USERNAME_KEY, DEFAULT_USERNAME_VALUE);
+    private static final String PASSWORD_KEY = "password";
+    private static final String DEFAULT_PASSWORD_VALUE = PASSWORD_KEY;
+    private static final String PASSWORD_FIELD = CONFIGS.getProperty(PASSWORD_KEY, DEFAULT_PASSWORD_VALUE);
+    private static final String PERMISSION_KEY = "permission";
+    private static final String DEFAULT_PERMISSION_VALUE = PERMISSION_KEY;
+    private static final String PERMISSION_FIELD = CONFIGS.getProperty(PERMISSION_KEY, DEFAULT_PERMISSION_VALUE);
     private static final String USER_DB = CONFIGS.getProperty("schema", "userdb");
     private static final String USER_TABLE = CONFIGS.getProperty("table", "user");
 

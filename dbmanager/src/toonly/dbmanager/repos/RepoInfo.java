@@ -7,6 +7,9 @@ import toonly.dbmanager.lowlevel.DT;
  * Created by cls on 15-3-15.
  */
 public class RepoInfo implements Creatable, Addable, Selable {
+
+    public static final String VERSION_COLUMN = "version";
+
     @Column
     @KeyColumn
     @DT(type = DT.Type.SHORTTEXT)
@@ -49,4 +52,5 @@ public class RepoInfo implements Creatable, Addable, Selable {
     public void setVersion(int version) {
         this.version = version;
     }
+
 }

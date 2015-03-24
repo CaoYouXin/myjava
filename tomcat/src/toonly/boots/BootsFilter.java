@@ -50,8 +50,6 @@ public class BootsFilter implements Filter {
     private static final String DEFAULT_HOME_PAGE = "/index.jsp";
     private static final String ADMIN_HOME_PAGE = "admin_home";
     private static final String DEFAULT_ADMIN_HOME_PAGE = "/index.jsp#stuff";
-    private static final String BLOCK_PAGE = "block_page";
-    private static final String DEFAULT_BLOCK_PAGE = "/503.html";
     private static final String API_V1 = "/api/v1";
     private Properties configer;
     private List<String> matchers;

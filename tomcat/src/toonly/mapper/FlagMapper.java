@@ -34,6 +34,8 @@ import static toonly.mapper.ret.RB.RB_KEY_SUC;
 @WebServlet(name = "flag_mapper", urlPatterns = { "/api/v1/*" })
 public class FlagMapper extends HttpServlet {
 
+    public static final String CHARSET_NAME = "UTF-8";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FlagMapper.class);
     private static final String CONFIG_FILE_NAME = "redirect.prop";
 
@@ -171,9 +173,9 @@ public class FlagMapper extends HttpServlet {
     }
 
     public static void sendResponse(HttpServletResponse resp, RB ret) throws IOException {
-        resp.addHeader("Content-Type", "application/json;charset=UTF-8");
+        resp.addHeader("Content-Type", "application/json;charset=" + CHARSET_NAME);
         ServletOutputStream outputStream = resp.getOutputStream();
-        outputStream.write(ret.toJson().getBytes("UTF-8"));
+        outputStream.write(ret.toJson().getBytes(CHARSET_NAME));
         outputStream.flush();
         outputStream.close();
     }

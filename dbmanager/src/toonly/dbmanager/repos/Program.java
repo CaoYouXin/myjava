@@ -16,9 +16,10 @@ public class Program implements Addable, Modable, Delable, Selable, Creatable {
 
     public static final Program INSTANCE = new Program();
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Program.class);
     private static final String CONFIG_FILE_NAME = "program.repo";
+    private static final String VERSION_COLUMN = "version";
     private Properties config = new PropsConfiger().cache(CONFIG_FILE_NAME);
+
     @Column
     @KeyColumn
     @DT(type = DT.Type.SHORTTEXT)
@@ -26,7 +27,7 @@ public class Program implements Addable, Modable, Delable, Selable, Creatable {
     @Column
     @DuplicatedColumn
     @DT(type = DT.Type.INTEGER)
-    private int version = Integer.valueOf(this.config.getProperty("version", "0"));
+    private int version = Integer.valueOf(this.config.getProperty(VERSION_COLUMN, "0"));
     private boolean isRegistered = false;
     private Status status = null;
 
@@ -63,8 +64,13 @@ public class Program implements Addable, Modable, Delable, Selable, Creatable {
         switch (this.status) {
             case NO_REPO_DB:
                 this.createDatabase();
+                this.createTable();
+                this.add();
+                break;
             case NO_PROGRAM_TB:
                 this.createTable();
+                this.add();
+                break;
             case NO_PROGRAM_RD:
                 this.add();
                 break;
@@ -102,7 +108,7 @@ public class Program implements Addable, Modable, Delable, Selable, Creatable {
     }
 
     private boolean checkVersion(RS rs) {
-        int currentVersion = rs.getInt("version");
+        int currentVersion = rs.getInt(VERSION_COLUMN);
         if (currentVersion < this.version) {
             this.status = Status.UN_UPDATE_VS;
             return false;

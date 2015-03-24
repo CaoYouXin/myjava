@@ -5,6 +5,8 @@ import toonly.dbmanager.base.Creatable;
 import toonly.dbmanager.lowlevel.RS;
 import toonly.dbmanager.permission.PofM;
 
+import static toonly.dbmanager.repos.RepoInfo.VERSION_COLUMN;
+
 /**
  * Created by cls on 15-3-15.
  */
@@ -14,31 +16,15 @@ public interface Updatable extends Creatable {
     public int getVersion();
 
     default public boolean needUpdateDDL() {
-        if (!this.isDatabaseExist()) {
+        if (this.ifCreateNeed()) {
             return true;
         }
 
-        if (!this.isTableExist()) {
-            return true;
-        }
-
-        RepoInfo repoInfo = new RepoInfo();
-        repoInfo.setProgram(Program.INSTANCE.getName());
-        repoInfo.setDb(this.getSchemaName());
-        repoInfo.setTable(this.getTableName());
-        repoInfo.setVersion(this.getVersion());
-
-        if (!repoInfo.isDatabaseExist()) {
-            repoInfo.createDatabase();
-        }
-
-        if (!repoInfo.isTableExist()) {
-            repoInfo.createTable();
-        }
+        RepoInfo repoInfo = getRepoInfo();
 
         RS rs = repoInfo.keySelect();
         while (rs.next()) {
-            return this.getVersion() > rs.getInt("version");
+            return this.getVersion() > rs.getInt(VERSION_COLUMN);
         }
 
         return true;
@@ -46,25 +32,17 @@ public interface Updatable extends Creatable {
 
     @PofM(who = "S")
     default public boolean updateDDL() {
-        if (!this.isDatabaseExist())
-            this.createDatabase();
-
         RepoInfo repoInfo = getRepoInfo();
 
-        if (!repoInfo.isDatabaseExist())
-            repoInfo.createDatabase();
-
-        if (!repoInfo.isTableExist())
-            repoInfo.createTable();
-
-        if (!this.isTableExist()) {
-            return this.createTable() && repoInfo.addForDuplicated();
+        if (this.ifCreateNeed()) {
+            return this.createIfNeed() && repoInfo.addForDuplicated();
         }
 
         RS rs = repoInfo.keySelect();
         while (rs.next()) {
-            if (this.getVersion() <= rs.getInt("version"))
+            if (this.getVersion() <= rs.getInt(VERSION_COLUMN)) {
                 return true;
+            }
         }
 
         return this.reCreateTable() && repoInfo.addForDuplicated();
@@ -76,6 +54,7 @@ public interface Updatable extends Creatable {
         repoInfo.setDb(this.getSchemaName());
         repoInfo.setTable(this.getTableName());
         repoInfo.setVersion(this.getVersion());
+        repoInfo.createIfNeed();
         return repoInfo;
     }
 

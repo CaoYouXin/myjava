@@ -29,7 +29,12 @@ public interface Creatable extends Entity {
     }
 
     default public boolean createDatabase() {
-        return DB.instance().createDatabase(this.getSchemaName());
+        synchronized (this) {
+            if (this.isDatabaseExist()) {
+                return true;
+            }
+            return DB.instance().createDatabase(this.getSchemaName());
+        }
     }
 
     default public boolean reCreateDatabase() {
@@ -43,12 +48,18 @@ public interface Creatable extends Entity {
     }
 
     default public boolean createTable() {
-        ECCalculator ecc = new ECCalculator(this);
+        synchronized (this) {
+            if (this.isTableExist()) {
+                return true;
+            }
 
-        TableId tableId = new TableId(this.getSchemaName(), this.getTableName());
+            ECCalculator ecc = new ECCalculator(this);
 
-        SQL create = getCreate(ecc, tableId);
-        return DB.instance().simpleExecute(create.toSql());
+            TableId tableId = new TableId(this.getSchemaName(), this.getTableName());
+
+            SQL create = getCreate(ecc, tableId);
+            return DB.instance().simpleExecute(create.toSql());
+        }
     }
 
     default public boolean reCreateTable() {
@@ -59,6 +70,23 @@ public interface Creatable extends Entity {
         SQL drop = new Drop(tableId).ifExist();
         SQL create = getCreate(ecc, tableId);
         return DB.instance().simpleExecute(drop.toSql()) && DB.instance().simpleExecute(create.toSql());
+    }
+
+    default public boolean createIfNeed() {
+        boolean suc = false;
+        if (!this.isDatabaseExist()) {
+            suc = this.createDatabase();
+        }
+
+        if (suc && !this.isTableExist()) {
+            suc = this.createTable();
+        }
+
+        return suc;
+    }
+
+    default public boolean ifCreateNeed() {
+        return !(this.isDatabaseExist() && this.isTableExist());
     }
 
 }

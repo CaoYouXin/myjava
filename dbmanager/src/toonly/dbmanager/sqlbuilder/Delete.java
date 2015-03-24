@@ -1,9 +1,14 @@
 package toonly.dbmanager.sqlbuilder;
 
+import java.util.function.Function;
+
 /**
  * Created by caoyouxin on 15-1-22.
  */
 public class Delete implements SQL, PreparedSQL {
+
+    private static final String BASIC = "DELETE FROM %s";
+    private static final String SOMETHING = " %s";
 
     protected TableId tableId;
     protected Where where;
@@ -19,17 +24,19 @@ public class Delete implements SQL, PreparedSQL {
 
     @Override
     public String toSql() {
-        if (null == this.where) {
-            return String.format("DELETE FROM %s", this.tableId.toSql());
-        }
-        return String.format("DELETE FROM %s %s", this.tableId.toSql(), this.where.toSql());
+        return this.sql(SQL::toSql);
     }
 
     @Override
     public String toPreparedSql() {
-        if (null == this.where) {
-            return String.format("DELETE FROM %s", this.tableId.toSql());
-        }
-        return String.format("DELETE FROM %s %s", this.tableId.toSql(), this.where.toPreparedSql());
+        return this.sql(PreparedSQL::toPreparedSql);
     }
+
+    private String sql(Function<Where, String> fn) {
+        if (null == this.where) {
+            return String.format(BASIC, this.tableId.toSql());
+        }
+        return String.format(BASIC + SOMETHING, this.tableId.toSql(), fn.apply(this.where));
+    }
+
 }

@@ -20,88 +20,86 @@ import java.util.function.Function;
  */
 public class ServletUser extends SW<ServletRequest> {
 
-    private static final Map<String, LoginUser> _NAME_2_USER = new HashMap<>();
-
-    public static boolean _login(String username, String permission) {
-        _NAME_2_USER.put(username, new LoginUser(permission, LocalDateTime.now()));
-        return true;
-    }
-
-    private static boolean _logout(String username) {
-        return null != _NAME_2_USER.remove(username);
-    }
-
-    public static String _getPermission(String username) {
-        LoginUser loginUser = _NAME_2_USER.get(username);
-        if (null != loginUser) {
-            return loginUser._permission;
-        }
-        return P.NULL;
-    }
-
+    private static final Map<String, LoginUser> NAME_2_USER = new HashMap<>();
     private static final Logger log = LoggerFactory.getLogger(ServletUser.class);
-
-    private boolean _isNormalRequest;
-    private boolean _needInit;
-    private String _username;
+    private boolean isNormalRequest;
+    private boolean needInit;
+    private String username;
 
     public ServletUser(ServletRequest source) {
         super(source);
         init();
     }
 
+    public static boolean _login(String username, String permission) {
+        NAME_2_USER.put(username, new LoginUser(permission, LocalDateTime.now()));
+        return true;
+    }
+
+    private static boolean _logout(String username) {
+        return null != NAME_2_USER.remove(username);
+    }
+
+    public static String _getPermission(String username) {
+        LoginUser loginUser = NAME_2_USER.get(username);
+        if (null != loginUser) {
+            return loginUser.permission;
+        }
+        return P.NULL;
+    }
+
     private void init() {
 
         Object username = this.val().getParameter("un");
         if (null == username) {
-            this._isNormalRequest = true;
+            this.isNormalRequest = true;
             return;
         }
-        this._isNormalRequest = false;
-        this._username = username.toString();
+        this.isNormalRequest = false;
+        this.username = username.toString();
 
     }
 
     boolean login() {
         Object password = this.val().getParameter("pwd");
-        Debugger.debugRun(this, () -> log.info("un : {} ; pwd : {}", this._username, Objects.toString(password)));
+        Debugger.debugRun(this, () -> log.info("un : {} ; pwd : {}", this.username, Objects.toString(password)));
         if (null == password) {
             NullPointerException e = new NullPointerException();
             BugReporter.reportBug(this, "登录不发密码……真是醉了", e);
             return false;
         }
 
-        UserSelecter.Ret ret = UserSelecter.check(this._username, password.toString());
+        UserSelecter.Ret ret = UserSelecter.check(this.username, password.toString());
         if (ret.needInit) {
-            this._needInit = true;
+            this.needInit = true;
             return false;
         }
 
         if (ret.suc)
-            return _login(this._username, ret.permission);
+            return _login(this.username, ret.permission);
         else
-            _logout(this._username);
+            _logout(this.username);
         return false;
     }
 
     boolean logout() {
-        return _logout(this._username);
+        return _logout(this.username);
     }
 
     boolean isNormalRequest() {
-        return this._isNormalRequest;
+        return this.isNormalRequest;
     }
 
     boolean isLogin() {
-        return this.is((loginUser) -> true);
+        return this.is(loginUser -> true);
     }
 
     boolean isAdmin() {
-        return this.is((loginUser) -> P.S == loginUser._permission);
+        return this.is(loginUser -> P.S == loginUser.permission);
     }
 
     private boolean is(Function<LoginUser, Boolean> fn) {
-        LoginUser loginUser = _NAME_2_USER.get(this._username);
+        LoginUser loginUser = NAME_2_USER.get(this.username);
         if (null == loginUser) {
             Debugger.debugRun(this, () -> log.info("never login."));
             return false;
@@ -110,29 +108,29 @@ public class ServletUser extends SW<ServletRequest> {
         if (loginUser.update()) {
             return fn.apply(loginUser);
         } else {
-            _logout(this._username);
+            _logout(this.username);
             Debugger.debugRun(this, () -> log.info("has logout."));
             return false;
         }
     }
 
-    Object getUserName() {
+    public Object getUserName() {
         SW<String> username = new SW<>("");
         Debugger.debugRun(this, () -> username.val("test"));
-        return Objects.isNull(this._username) ? username.val() : this._username;
+        return Objects.isNull(this.username) ? username.val() : this.username;
     }
 
     public boolean isNeedInit() {
-        return this._needInit;
+        return this.needInit;
     }
 
     private static class LoginUser {
 
-        private String _permission;
+        private String permission;
         private LocalDateTime _lastUpdate;
 
-        public LoginUser(String _permission, LocalDateTime _lastUpdate) {
-            this._permission = _permission;
+        public LoginUser(String permission, LocalDateTime _lastUpdate) {
+            this.permission = permission;
             this._lastUpdate = _lastUpdate;
         }
 

@@ -2,8 +2,9 @@ package toonly.boots;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import toonly.appobj.InvokeAppError;
+import toonly.appobj.UnPermissioned;
 import toonly.configer.PropsConfiger;
-import toonly.configer.cache.UncachedException;
 import toonly.configer.watcher.WatchServiceWrapper;
 import toonly.dbmanager.lowlevel.DB;
 import toonly.debugger.BugReporter;
@@ -78,7 +79,6 @@ public class BootsFilter implements Filter {
         if (this.block(servletResponse, stringWrapper, user)) {
             return;
         }
-
 
         if (this.updateDB((HttpServletResponse) servletResponse, stringWrapper, user)) {
             return;
@@ -157,7 +157,13 @@ public class BootsFilter implements Filter {
          * 升级数据库操作
          */
         if (stringWrapper.matchFrom0("/init.do")) {
-            boolean b = ReposManager.INSTANCE.makeUpToDate();
+            boolean b = false;
+            try {
+                b = ReposManager.INSTANCE.makeUpToDate(user.getUserName().toString());
+            } catch (Exception e) {
+                this.updateDBFail(e, servletResponse);
+                return true;
+            }
             RB ret = new RB().put("suc", b);
             FlagMapper.sendResponse(servletResponse, ret);
             if (b) {
@@ -168,12 +174,23 @@ public class BootsFilter implements Filter {
         return false;
     }
 
+    private void updateDBFail(Exception e, HttpServletResponse servletResponse) throws IOException {
+        RB ret = new RB().put("suc", false);
+        if (e instanceof UnPermissioned) {
+            FlagMapper.sendResponse(servletResponse, ret.put("msg", "unp"));
+        } else if (e instanceof InvokeAppError) {
+            servletResponse.sendError(500);
+        }
+    }
+
     private boolean block(ServletResponse servletResponse, StringWrapper stringWrapper, ServletUser user) throws IOException {
+        HttpServletResponse response = new HttpServletResponseWrapper((HttpServletResponse) servletResponse);
+
         /**
          * 保护《某些》目录
          */
         if (stringWrapper.matchFrom0(this.matchers)) {
-            redirect(servletResponse, BLOCK_PAGE, DEFAULT_BLOCK_PAGE);
+            response.sendError(503);
             return true;
         }
 
@@ -181,7 +198,7 @@ public class BootsFilter implements Filter {
          * 系统调试阶段，只有管理员可以进入
          */
         if (SysStatus.isDebugging() && !user.isAdmin()) {
-            redirect(servletResponse, BLOCK_PAGE, DEFAULT_BLOCK_PAGE);
+            response.sendError(503);
             return true;
         }
 

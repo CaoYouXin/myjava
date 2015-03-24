@@ -1,6 +1,8 @@
 package toonly.repos;
 
 import toonly.appobj.AppFactory;
+import toonly.appobj.InvokeAppError;
+import toonly.appobj.UnPermissioned;
 import toonly.dbmanager.repos.Program;
 import toonly.dbmanager.repos.Updatable;
 import toonly.debugger.BugReporter;
@@ -15,38 +17,40 @@ public class ReposManager {
 
     public static final ReposManager INSTANCE = new ReposManager();
 
+    private static final String MSG = "孤正在检查软件库的时候，不能创建app对象";
+
     private final AtomicBoolean isUpToDate = new AtomicBoolean(false);
 
     private ReposManager() {
     }
 
     public boolean isUpToDate() {
-        if (this.isUpToDate.get())
+        if (this.isUpToDate.get()) {
             return true;
+        }
 
         synchronized (this) {
-            if (this.isUpToDate.get())
+            if (this.isUpToDate.get()) {
                 return true;
+            }
 
-            if (!Program.INSTANCE.isRegistered())
+            if (!Program.INSTANCE.isRegistered()) {
                 return false;
+            }
 
             SW<Boolean> bool = new SW<>(true);
-            AppFactory.instance.forEach((appClass) -> {
+            AppFactory.instance.forEach(appClass -> {
                 if (!bool.val()) {
                     return;
                 }
 
-                Object app = null;
-                try {
-                    app = appClass.newInstance();
-                } catch (InstantiationException | IllegalAccessException e) {
-                    BugReporter.reportBug(this, "在检查软件库的时候，不能创建app对象", e);
-                }
+                Object app = AppFactory.instance.getAppObject(appClass);
                 if (app instanceof Updatable) {
-                    Updatable updatable = (Updatable) app;
-                    if (updatable.needUpdateDDL()) {
+                    Object ret = AppFactory.instance.invokeMethod(null, app, "needUpdateDDL");
+                    if (!(ret instanceof InvokeAppError)) {
                         bool.val(false);
+                    } else {
+                        bool.val((Boolean) ret);
                     }
                 }
             });
@@ -59,34 +63,41 @@ public class ReposManager {
         }
     }
 
-    public synchronized boolean makeUpToDate() {
+    public synchronized boolean makeUpToDate(String username) throws Exception {
         if (this.isUpToDate.get())
             return true;
 
         SW<Boolean> bool = new SW<>(true);
-        if (!Program.INSTANCE.isRegistered())
+        if (!Program.INSTANCE.isRegistered()) {
             bool.val(Program.INSTANCE.register());
+        }
 
-        if (!bool.val())
+        if (!bool.val()) {
             return false;
+        }
 
-        AppFactory.instance.forEach((appClass) -> {
+        SW<Exception> e = new SW<>();
+        AppFactory.instance.forEach(appClass -> {
             if (!bool.val()) {
                 return;
             }
 
-            Object app = null;
-            try {
-                app = appClass.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                BugReporter.reportBug(this, "在检查软件库的时候，不能创建app对象", e);
-            }
+            Object app = AppFactory.instance.getAppObject(appClass);
             if (app instanceof Updatable) {
-                Updatable updatable = (Updatable) app;
-                bool.val(updatable.updateDDL());
+                Object ret = AppFactory.instance.invokeMethod(username, app, "updateDDL");
+                if (ret instanceof Boolean) {
+                    bool.val((Boolean) ret);
+                } else {
+                    e.val((Exception) ret);
+                    bool.val(false);
+                }
             }
         });
-        return bool.val();
+        if (e.isNull()) {
+            return bool.val();
+        } else {
+            throw e.val();
+        }
     }
 
     public void needCheck() {

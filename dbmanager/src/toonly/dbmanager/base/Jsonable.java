@@ -17,15 +17,13 @@ import java.time.format.DateTimeFormatter;
  */
 public interface Jsonable extends Entity {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger(Jsonable.class);
-
     default public boolean fromJson(String json) {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode root = null;
         try {
             root = objectMapper.reader().readTree(json);
         } catch (IOException e) {
-            LOGGER.info("cannot read from json : {}", json);
+            LoggerFactory.getLogger(Jsonable.class).info("cannot read from json : {}", json);
         }
 
         if (null == root) {
@@ -41,7 +39,7 @@ public interface Jsonable extends Entity {
             if (null != jsonNode) {
                 setValue(ecc, f, dt, jsonNode);
             } else {
-                LOGGER.info("cannot read completely from json : {} , field : {}", json, f);
+                LoggerFactory.getLogger(Jsonable.class).info("cannot read completely from json : {} , field : {}", json, f);
                 if (suc.val()) suc.val(false);
             }
         });
@@ -70,7 +68,7 @@ public interface Jsonable extends Entity {
                 o = LocalDateTime.parse(jsonNode.asText(), DateTimeFormatter.ISO_DATE_TIME);
                 break;
             default:
-                throw new RuntimeException("no such data type");
+                LoggerFactory.getLogger(Jsonable.class).info("no such data type");
         }
         ecc.setValue(f, o);
     }
@@ -80,7 +78,7 @@ public interface Jsonable extends Entity {
         try {
             return objectMapper.writeValueAsString(this);
         } catch (JsonProcessingException e) {
-            LOGGER.info("cannot write to json from class : [{}]", this.getClass().getName());
+            LoggerFactory.getLogger(Jsonable.class).info("cannot write to json from class : [{}]", this.getClass().getName());
             return null;
         }
     }

@@ -11,12 +11,16 @@ import toonly.dbmanager.permission.PofM;
 public interface Updatable extends Creatable {
 
     @JsonIgnore
-    int getVersion();
+    public int getVersion();
 
-    @PofM(who = "S")
     default public boolean needUpdateDDL() {
-        if (!this.isDatabaseExist())
+        if (!this.isDatabaseExist()) {
             return true;
+        }
+
+        if (!this.isTableExist()) {
+            return true;
+        }
 
         RepoInfo repoInfo = new RepoInfo();
         repoInfo.setProgram(Program.INSTANCE.getName());
@@ -24,15 +28,13 @@ public interface Updatable extends Creatable {
         repoInfo.setTable(this.getTableName());
         repoInfo.setVersion(this.getVersion());
 
-        if (!repoInfo.isDatabaseExist())
+        if (!repoInfo.isDatabaseExist()) {
             repoInfo.createDatabase();
+        }
 
-        if (!repoInfo.isTableExist())
+        if (!repoInfo.isTableExist()) {
             repoInfo.createTable();
-
-        if (!this.isTableExist())
-            return true;
-
+        }
 
         RS rs = repoInfo.keySelect();
         while (rs.next()) {
@@ -47,11 +49,7 @@ public interface Updatable extends Creatable {
         if (!this.isDatabaseExist())
             this.createDatabase();
 
-        RepoInfo repoInfo = new RepoInfo();
-        repoInfo.setProgram(Program.INSTANCE.getName());
-        repoInfo.setDb(this.getSchemaName());
-        repoInfo.setTable(this.getTableName());
-        repoInfo.setVersion(this.getVersion());
+        RepoInfo repoInfo = getRepoInfo();
 
         if (!repoInfo.isDatabaseExist())
             repoInfo.createDatabase();
@@ -59,9 +57,9 @@ public interface Updatable extends Creatable {
         if (!repoInfo.isTableExist())
             repoInfo.createTable();
 
-        if (!this.isTableExist())
+        if (!this.isTableExist()) {
             return this.createTable() && repoInfo.addForDuplicated();
-
+        }
 
         RS rs = repoInfo.keySelect();
         while (rs.next()) {
@@ -70,6 +68,15 @@ public interface Updatable extends Creatable {
         }
 
         return this.reCreateTable() && repoInfo.addForDuplicated();
+    }
+
+    default public RepoInfo getRepoInfo() {
+        RepoInfo repoInfo = new RepoInfo();
+        repoInfo.setProgram(Program.INSTANCE.getName());
+        repoInfo.setDb(this.getSchemaName());
+        repoInfo.setTable(this.getTableName());
+        repoInfo.setVersion(this.getVersion());
+        return repoInfo;
     }
 
 }

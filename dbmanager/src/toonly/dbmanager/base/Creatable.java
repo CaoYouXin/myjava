@@ -14,26 +14,35 @@ import java.util.List;
  */
 public interface Creatable extends Entity {
 
-    default boolean isDatabaseExist() {
+    public static SQL getCreate(ECCalculator ecc, TableId tableId) {
+        List<Create.DBField> fields = new ArrayList<>();
+        List<String> keyFields = ecc.getKeyFields();
+
+        ecc.dtForEach((name, type) -> fields.add(new Create.DBField(name, type.type(), keyFields.contains(name))));
+
+        return new Create(tableId, fields);
+    }
+
+    default public boolean isDatabaseExist() {
         List<String> databases = DB.instance().showDatabases();
         return databases.contains(this.getSchemaName());
     }
 
-    default boolean createDatabase() {
+    default public boolean createDatabase() {
         return DB.instance().createDatabase(this.getSchemaName());
     }
 
-    default boolean reCreateDatabase() {
+    default public boolean reCreateDatabase() {
         return DB.instance().dropDatabase(this.getSchemaName())
                 && DB.instance().createDatabase(this.getSchemaName());
     }
 
-    default boolean isTableExist() {
+    default public boolean isTableExist() {
         List<String> tables = DB.instance().showTables(this.getSchemaName());
         return tables.contains(this.getTableName());
     }
 
-    default boolean createTable() {
+    default public boolean createTable() {
         ECCalculator ecc = new ECCalculator(this);
 
         TableId tableId = new TableId(this.getSchemaName(), this.getTableName());
@@ -42,7 +51,7 @@ public interface Creatable extends Entity {
         return DB.instance().simpleExecute(create.toSql());
     }
 
-    default boolean reCreateTable() {
+    default public boolean reCreateTable() {
         ECCalculator ecc = new ECCalculator(this);
 
         TableId tableId = new TableId(this.getSchemaName(), this.getTableName());
@@ -50,15 +59,6 @@ public interface Creatable extends Entity {
         SQL drop = new Drop(tableId).ifExist();
         SQL create = getCreate(ecc, tableId);
         return DB.instance().simpleExecute(drop.toSql()) && DB.instance().simpleExecute(create.toSql());
-    }
-
-    default SQL getCreate(ECCalculator ecc, TableId tableId) {
-        List<Create.DBField> fields = new ArrayList<>();
-        List<String> keyFields = ecc.getKeyFields();
-
-        ecc.dtForEach((name, type) -> fields.add(new Create.DBField(name, type.type(), keyFields.contains(name))));
-
-        return new Create(tableId, fields);
     }
 
 }

@@ -21,7 +21,7 @@ public interface FileTool {
     }
 
     public static String getConfigFilePath(@NotNull String relativePath) {
-        return getPath(t -> t + FILE_SEPARATOR + relativePath);
+        return getPath(t -> t + relativePath);
     }
 
     public static String getPath(@NotNull Function<String, String> fn) {
@@ -32,7 +32,7 @@ public interface FileTool {
                 , FILE_SEPARATOR, configs);
         File file = new File(name);
         if (file.exists()) {
-            return fn.apply(name);
+            return fn.apply(name + FILE_SEPARATOR);
         }
 
         Class<FileTool> iConfigerClass = FileTool.class;

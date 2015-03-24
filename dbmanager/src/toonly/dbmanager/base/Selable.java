@@ -14,7 +14,7 @@ import java.util.List;
 public interface Selable extends Entity {
 
     @PofM(who = P.AB)
-    default RS select() {
+    default public RS select() {
         ECCalculator ecc = new ECCalculator(this);
 
         SQL select = new Select(new TableId(this.getSchemaName(), this.getTableName()), ecc.getFields());
@@ -22,26 +22,26 @@ public interface Selable extends Entity {
     }
 
     @PofM(who = P.AB)
-    default RS keySelect() {
+    default public RS keySelect() {
         ECCalculator ecc = new ECCalculator(this);
 
         TableId tableId = new TableId(this.getSchemaName(), this.getTableName());
         List<String> whereFields = ecc.getKeyFields();
         Where where = new Where(new Equal(tableId, whereFields.get(0)));
-        whereFields.subList(1, whereFields.size()).forEach((f) -> where.addExpression(true, new Equal(tableId, f)));
+        whereFields.subList(1, whereFields.size()).forEach(f -> where.addExpression(true, new Equal(tableId, f)));
 
         PreparedSQL select = new Select(tableId, ecc.getFields()).where(where);
         return DB.instance().preparedQuery(select.toPreparedSql(), ecc.getValuesInOrder(whereFields));
     }
 
     @PofM(who = P.AB)
-    default RS filterSelect() {
+    default public RS filterSelect() {
         ECCalculator ecc = new ECCalculator(this);
 
         TableId tableId = new TableId(this.getSchemaName(), this.getTableName());
         List<String> whereFields = ecc.getNotNullFields();
         Where where = new Where(new Equal(tableId, whereFields.get(0)));
-        whereFields.subList(1, whereFields.size()).forEach((f) -> where.addExpression(true, new Equal(tableId, f)));
+        whereFields.subList(1, whereFields.size()).forEach(f -> where.addExpression(true, new Equal(tableId, f)));
 
         PreparedSQL select = new Select(tableId, ecc.getFields()).where(where);
         return DB.instance().preparedQuery(select.toPreparedSql(), ecc.getValuesInOrder(whereFields));

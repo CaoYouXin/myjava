@@ -44,7 +44,9 @@ public class FlagMapper extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (this.checkDBStatus(resp)) return;
+        if (this.checkDBStatus(resp)) {
+            return;
+        }
 
         /**
          * 读取数据

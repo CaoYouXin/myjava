@@ -6,7 +6,6 @@
 package toonly.dbmanager.lowlevel;
 
 import org.slf4j.LoggerFactory;
-import toonly.configer.FileTool;
 import toonly.debugger.Debugger;
 
 import java.nio.charset.Charset;

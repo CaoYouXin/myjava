@@ -89,7 +89,7 @@ public class AppFactory implements ChangeWatcher.ChangeListener {
     }
 
     public Object invokeMethod(String username, Object app, String methodName) {
-        String userP = ServletUser._getPermission(username);
+        String userP = ServletUser.getPermission(username);
         Class<?> aClass = app.getClass();
 
         boolean permission = checkClassPermission(methodName, userP, aClass);

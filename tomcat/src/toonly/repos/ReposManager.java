@@ -54,14 +54,16 @@ public class ReposManager {
             }
         });
 
-        return this.handleRetOuter(e, () -> {
-            if (bool.val()) {
-                this.isUpToDate.set(true);
-                return true;
-            } else {
-                return false;
-            }
-        });
+        return this.handleRetOuter(e, () -> returnByBool(bool));
+    }
+
+    private boolean returnByBool(SW<Boolean> bool) {
+        if (bool.val()) {
+            this.isUpToDate.set(true);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public synchronized boolean makeUpToDate(String username) throws Exception {

@@ -41,7 +41,7 @@ public class ServletUser extends SW<ServletRequest> {
         return null != NAME_2_USER.remove(username);
     }
 
-    public static String _getPermission(String username) {
+    public static String getPermission(String username) {
         LoginUser loginUser = NAME_2_USER.get(username);
         if (null != loginUser) {
             return loginUser.permission;

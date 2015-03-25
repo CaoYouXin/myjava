@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JacksonTester {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger(JacksonTester.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JacksonTester.class);
 
     @Test
     public void fromJsonTest() {

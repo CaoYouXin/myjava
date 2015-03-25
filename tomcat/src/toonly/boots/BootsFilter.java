@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Properties;
 
 import static toonly.boots.ServletUser._login;
+import static toonly.mapper.FlagMapper.CHARSET_NAME;
 import static toonly.mapper.ret.RB.RB_KEY_PROBLEM;
 import static toonly.mapper.ret.RB.RB_KEY_SUC;
 
@@ -209,8 +210,8 @@ public class BootsFilter implements Filter {
         /**
          * 设置编码
          */
-        servletRequest.setCharacterEncoding("UTF-8");
-        servletResponse.setCharacterEncoding("UTF-8");
+        servletRequest.setCharacterEncoding(CHARSET_NAME);
+        servletResponse.setCharacterEncoding(CHARSET_NAME);
 
         /**
          * 这么强制转型，是因为它是Tomcat

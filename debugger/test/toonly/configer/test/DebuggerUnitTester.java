@@ -5,6 +5,7 @@ import io.evanwong.oss.hipchat.v2.rooms.MessageColor;
 import io.evanwong.oss.hipchat.v2.rooms.MessageFormat;
 import io.evanwong.oss.hipchat.v2.rooms.SendRoomNotificationRequestBuilder;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 import toonly.configer.ReportConfiger;
 import toonly.debugger.BugReporter;
 import toonly.debugger.Debugger;
@@ -18,7 +19,7 @@ import java.util.Objects;
 public class DebuggerUnitTester {
 
     @Test
-    public void test() {
+    public void test() throws InterruptedException {
         String name = "中文", msg = "哇咔咔";
         Exception e = null;
 
@@ -39,48 +40,22 @@ public class DebuggerUnitTester {
                         .report("msg", msg)
                         .report("exp", Objects.toString(sb, "NULL"))
                         .toString()
-                );
+        );
         builder.setMessageFormat(MessageFormat.TEXT).setColor(MessageColor.YELLOW).setNotify(true).build().execute();
-        //NOT optional...
-//        try {
-//            NoContent noContent = future.get();
-//        } catch (InterruptedException ex) {
-//            ex.printStackTrace();
-//        } catch (ExecutionException ex) {
-//            ex.printStackTrace();
-//        }
 
-//        new Thread(() -> {
-//            try {
-//                future.get();
-//            } catch (InterruptedException e1) {
-//                e1.printStackTrace();
-//            } catch (ExecutionException e1) {
-//                e1.printStackTrace();
-//            }
-//        }).start();
-
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e1) {
-            e1.printStackTrace();
-        }
+        Thread.sleep(10000);
     }
 
     @Test
-    public void reportBugTest() {
+    public void reportBugTest() throws InterruptedException {
         BugReporter.reportBug(this, "你好！", new Exception("哦哦哦"));
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e1) {
-            e1.printStackTrace();
-        }
+        Thread.sleep(10000);
     }
 
     @Test
     public void featureTest() {
         Feature.set(6);
-        Debugger.debugRun(this, () -> System.out.println("哈哈哈哈"));
+        Debugger.debugRun(this, () -> LoggerFactory.getLogger(DebuggerUnitTester.class).info("哈哈哈哈"));
     }
 
 }

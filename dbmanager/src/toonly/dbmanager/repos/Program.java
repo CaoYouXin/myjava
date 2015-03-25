@@ -1,7 +1,5 @@
 package toonly.dbmanager.repos;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import toonly.configer.PropsConfiger;
 import toonly.dbmanager.base.*;
 import toonly.dbmanager.lowlevel.DT;

@@ -12,8 +12,7 @@ import java.util.List;
  */
 public interface Modable extends Entity {
 
-    @PofM(who = P.A)
-    default public boolean modify() {
+    @PofM(who = P.A) default boolean modify() {
         ECCalculator ecc = new ECCalculator(this);
 
         TableId tableId = new TableId(this.getSchemaName(), this.getTableName());

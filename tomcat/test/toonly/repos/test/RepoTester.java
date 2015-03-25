@@ -2,6 +2,8 @@
 package toonly.repos.test;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import toonly.dbmanager.lowlevel.DB;
 import toonly.dbmanager.repos.Program;
 
@@ -14,15 +16,17 @@ import java.util.Map;
  */
 public class RepoTester {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RepoTester.class);
+    
     @Test
     public void test() {
         List<String> databases = DB.instance().showDatabases();
         String schemaName = Program.INSTANCE.getSchemaName();
-        databases.forEach((db) -> System.out.println(db.equals(schemaName)));
-        System.out.println(databases.contains(schemaName));
+        databases.forEach(db -> LOGGER.info("{}", db.equals(schemaName)));
+        LOGGER.info("{}", databases.contains(schemaName));
         boolean registered = Program.INSTANCE.isRegistered();
-        System.out.println(registered);
-        System.out.println(Program.INSTANCE.getStatus());
+        LOGGER.info("{}", registered);
+        LOGGER.info("{}", Program.INSTANCE.getStatus());
         if (!registered) {
             Program.INSTANCE.register();
         }
@@ -30,8 +34,8 @@ public class RepoTester {
 
     @Test
     public void nullTest() {
-        Map<String, String> NAME_2_USER = new HashMap<>();
-        System.out.println(NAME_2_USER.get(null));
+        Map<String, String> name2User = new HashMap<>();
+        LOGGER.info("{}", name2User.get(null));
     }
 
 }

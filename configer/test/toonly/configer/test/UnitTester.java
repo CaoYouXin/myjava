@@ -1,6 +1,7 @@
 package toonly.configer.test;
 
 import org.junit.Test;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import toonly.configer.FileTool;
 import toonly.configer.PropsConfiger;
@@ -16,11 +17,14 @@ import java.util.*;
  */
 public class UnitTester {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UnitTester.class);
+    private static final String REDIRECT_PROP = "redirect.prop";
+
     @Test
     public void streamTest() {
         SimpleConfiger<Properties> configer = new PropsConfiger();
         Properties config = configer.config("test.prop");
-        System.out.println(String.format("%s = %s", "a", config.getProperty("a")));
+        LOGGER.info("{} = {}", "a", config.getProperty("a"));
     }
 
     @Test
@@ -31,7 +35,7 @@ public class UnitTester {
         docs.addAll(Arrays.asList(line.split("%")));
         docs.add("\n");
 
-        System.out.println(docs);
+        LOGGER.info("{}", docs);
 
         Map<String, String> reps = new HashMap<>();
         reps.put("ss", "中文");
@@ -39,45 +43,37 @@ public class UnitTester {
 
         StringBuilder sb = new StringBuilder();
         docs.stream()
-                .map((doc) -> reps.containsKey(doc) ? reps.get(doc) : doc)
-                .forEach((doc) -> sb.append(doc));
-        System.out.println(sb.toString());
+                .map(doc -> reps.containsKey(doc) ? reps.get(doc) : doc)
+                .forEach(sb::append);
+        LOGGER.info(sb.toString());
     }
 
     @Test
-    public void resourceTest() {
+    public void resourceTest() throws IOException {
         Class<UnitTester> iConfigerClass = UnitTester.class;
         String name = new StringWrapper(iConfigerClass.getPackage().getName()).toUpPath().val()
-                + "redirect.prop";
-        System.out.println(name);
+                + REDIRECT_PROP;
+        LOGGER.info(name);
         InputStream aaa = iConfigerClass.getResourceAsStream(name);
         Properties properties = new Properties();
-        try {
-            properties.load(aaa);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        properties.load(aaa);
     }
 
     @Test
     public void asListTest() {
         List<String> strings = Arrays.asList("a", "b", "a");
-        strings.stream().map((str) -> "a".equals(str) ? "c" : str).forEach(System.out::println);
+        strings.stream().map(str -> "a".equals(str) ? "c" : str).forEach(LOGGER::info);
     }
 
     @Test
     public void lineSepTest() {
-        System.out.println("A" + FileTool.LINE_SEPARATOR + "A");
+        LOGGER.info("A" + FileTool.LINE_SEPARATOR + "A");
     }
 
-    public static void main(String[] args) {
-        InputStream aaa = UnitTester.class.getResourceAsStream("redirect.prop");
+    public static void main(String[] args) throws IOException {
+        InputStream aaa = UnitTester.class.getResourceAsStream(REDIRECT_PROP);
         Properties properties = new Properties();
-        try {
-            properties.load(aaa);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        properties.load(aaa);
     }
 
     @Test
@@ -87,7 +83,7 @@ public class UnitTester {
         map.put("b", new String[]{ "b1", "b2" });
         Map<String, List<String>> printMap = new HashMap();
         map.forEach((k, l) -> printMap.put(k, Arrays.asList(l)));
-        LoggerFactory.getLogger("printer").info("{}", printMap);
+        LOGGER.info("{}", printMap);
     }
 
 }

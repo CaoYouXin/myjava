@@ -181,7 +181,7 @@ public class FlagMapper extends HttpServlet {
     }
 
     private void printRequest(HttpServletRequest req) throws IOException {
-        req.setCharacterEncoding("UTF-8");
+        req.setCharacterEncoding(CHARSET_NAME);
 
         LOGGER.info("servlet path : {}", req.getServletPath());
         LOGGER.info("servlet content type : {}", req.getContentType());

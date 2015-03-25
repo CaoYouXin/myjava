@@ -133,9 +133,8 @@ public final class DB {
     private String[] parseLabels(String sql) {
         String upperSql = sql.toUpperCase();
         String select = "SELECT";
-        String labelSql = sql.substring(upperSql.indexOf(select) + select.length());
         String from = "FROM";
-        labelSql = labelSql.substring(0, upperSql.indexOf(from));
+        String labelSql = sql.substring(upperSql.indexOf(select) + select.length(), upperSql.indexOf(from));
         String[] labels = labelSql.split(",");
         for (int i = 0; i < labels.length; i++) {
             String label = labels[i];

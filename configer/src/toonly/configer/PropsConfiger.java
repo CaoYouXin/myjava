@@ -45,8 +45,8 @@ public class PropsConfiger implements FileTool, CachedConfiger<Properties>, Simp
     }
 
     @Override
-    public PropsConfiger AddChangeListener(ChangeListener listener) {
-        return this.support.AddChangeListener(listener);
+    public PropsConfiger addChangeListener(ChangeListener listener) {
+        return this.support.addChangeListener(listener);
     }
 
     @Override

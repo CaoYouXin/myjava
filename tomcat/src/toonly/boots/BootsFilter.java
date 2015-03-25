@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import static toonly.boots.ServletUser._login;
+import static toonly.boots.ServletUser.sysLogin;
 import static toonly.mapper.FlagMapper.CHARSET_NAME;
 import static toonly.mapper.ret.RB.RB_KEY_PROBLEM;
 import static toonly.mapper.ret.RB.RB_KEY_SUC;
@@ -63,7 +63,7 @@ public class BootsFilter implements Filter {
         this.matchers = Arrays.asList(this.configer.getProperty("blocks", "/blocks").split("\\|\\|"));
         Debugger.debugRun(this, () -> {
             LOGGER.info("blocks : {}", this.matchers);
-            _login("test", "S");
+            sysLogin("test", "S");
         });
         LOGGER.info("boot done");
     }

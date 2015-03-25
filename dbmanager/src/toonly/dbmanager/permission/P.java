@@ -12,4 +12,7 @@ public class P {
     public static final String SB = "SB";
     public static final String AB = "AB";
     public static final String SAB = "SAB";
+
+    private P() {
+    }
 }

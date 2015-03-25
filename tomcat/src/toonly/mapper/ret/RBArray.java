@@ -16,8 +16,9 @@ public class RBArray {
             this.list = new ArrayList<>();
         }
 
-        if (this.list.add(rb))
+        if (this.list.add(rb)) {
             return this;
+        }
         return null;
     }
 

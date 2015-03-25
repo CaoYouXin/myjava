@@ -30,6 +30,7 @@ public class RepoTester {
         if (!registered) {
             Program.INSTANCE.register();
         }
+        DB.instance().close();
     }
 
     @Test

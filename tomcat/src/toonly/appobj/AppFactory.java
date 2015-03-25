@@ -25,7 +25,7 @@ import java.util.function.Consumer;
  */
 public class AppFactory implements ChangeWatcher.ChangeListener {
 
-    public static final AppFactory instance = new AppFactory();
+    public static final AppFactory INSTANCE = new AppFactory();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppFactory.class);
     private static final String APP_CFG = "app.cfg";
@@ -33,7 +33,7 @@ public class AppFactory implements ChangeWatcher.ChangeListener {
     private final Map<String, Class<?>> map = new HashMap<>();
     private final PropsConfiger propsConfiger = new PropsConfiger();
 
-    private Properties config = this.propsConfiger.watch(APP_CFG).AddChangeListener(this).cache(APP_CFG);
+    private Properties config = this.propsConfiger.watch(APP_CFG).addChangeListener(this).cache(APP_CFG);
 
     private AppFactory() {
         this.putToMap();
@@ -58,6 +58,7 @@ public class AppFactory implements ChangeWatcher.ChangeListener {
         try {
             return AppFactory.class.getClassLoader().loadClass(appClassName);
         } catch (ClassNotFoundException e) {
+            LOGGER.info("class not found : {}", appClassName);
             return Object.class;
         }
     }
@@ -70,6 +71,7 @@ public class AppFactory implements ChangeWatcher.ChangeListener {
         try {
             return aClass.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
+            LOGGER.info("app create error : {}", aClass.getName());
             return new Object();
         }
     }

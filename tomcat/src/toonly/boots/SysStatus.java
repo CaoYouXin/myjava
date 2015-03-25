@@ -7,14 +7,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class SysStatus {
 
-    private static final AtomicBoolean _IS_DEBUGGING = new AtomicBoolean(false);
+    private static final AtomicBoolean IS_DEBUGGING = new AtomicBoolean(false);
+
+    private SysStatus() {
+    }
 
     public static final boolean isDebugging() {
-        return _IS_DEBUGGING.get();
+        return IS_DEBUGGING.get();
     }
 
     public static final boolean setDebugging(boolean isDebugging) {
-        return _IS_DEBUGGING.compareAndSet(!isDebugging, isDebugging);
+        return IS_DEBUGGING.compareAndSet(!isDebugging, isDebugging);
     }
 
 }

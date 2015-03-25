@@ -44,27 +44,12 @@ public class FlagMapper extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        try {
-            if (!ReposManager.INSTANCE.isUpToDate()) {
-                resp.sendRedirect(this.redirectConfiger.getProperty("init_page", "/init.html"));
-                return;
-            }
-        } catch (Exception e) {
-            resp.sendError(500);
-            return;
-        }
+        if (this.checkDBStatus(resp)) return;
 
         /**
          * 读取数据
          */
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(req.getInputStream()));
-        line1.set(bufferedReader.readLine());
-        bufferedReader.close();
-
-        /**
-         * 打印调试信息
-         */
-        Debugger.debugExRun(this, () -> this.printRequest(req));
+        this.readData(req);
 
         /**
          * 解析path
@@ -75,11 +60,36 @@ public class FlagMapper extends HttpServlet {
         /**
          * 实例化对象
          */
-        Object app = AppFactory.instance.getAppObject(info[2]);
+        Object app = AppFactory.INSTANCE.getAppObject(info[2]);
 
         /**
          * 注入值
          */
+        this.injectValues(req, app);
+
+        /**
+         * 执行调用
+         */
+        Object invokeRet = AppFactory.INSTANCE.invokeMethod(req.getAttribute("un").toString(), app, info[3]);
+        if (null != invokeRet) {
+            this.ret(resp, info[1], invokeRet);
+            return;
+        }
+        sendResponse(resp, this.buildRB(false, "app 执行调用返回 null", null));
+    }
+
+    private void readData(HttpServletRequest req) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(req.getInputStream()));
+        line1.set(bufferedReader.readLine());
+        bufferedReader.close();
+
+        /**
+         * 打印调试信息
+         */
+        Debugger.debugExRun(this, () -> this.printRequest(req));
+    }
+
+    private void injectValues(HttpServletRequest req, Object app) {
         boolean constructed = false;
         if (app instanceof Jsonable) {
             Jsonable jsonable = (Jsonable) app;
@@ -87,18 +97,21 @@ public class FlagMapper extends HttpServlet {
         }
         if (!constructed && app instanceof ParamConstructable) {
             ParamConstructable paramConstructable = (ParamConstructable) app;
-            constructed = paramConstructable.construct(req.getParameterMap());
+            paramConstructable.construct(req.getParameterMap());
         }
+    }
 
-        /**
-         * 执行调用
-         */
-        Object invokeRet = AppFactory.instance.invokeMethod(req.getAttribute("un").toString(), app, info[3]);
-        if (null != invokeRet) {
-            this.ret(resp, info[1], invokeRet);
-            return;
+    private boolean checkDBStatus(HttpServletResponse resp) throws IOException {
+        try {
+            if (!ReposManager.INSTANCE.isUpToDate()) {
+                resp.sendRedirect(this.redirectConfiger.getProperty("init_page", "/init.html"));
+                return true;
+            }
+        } catch (Exception e) {
+            resp.sendError(500);
+            return true;
         }
-        sendResponse(resp, this.buildRB(false, "app 执行调用返回null", null));
+        return false;
     }
 
     private void ret(HttpServletResponse resp, String info, Object invokeRet) throws IOException {

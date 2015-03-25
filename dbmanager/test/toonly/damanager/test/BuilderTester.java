@@ -1,6 +1,7 @@
 package toonly.damanager.test;
 
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 import toonly.dbmanager.sqlbuilder.Equal;
 import toonly.dbmanager.sqlbuilder.TableId;
 import toonly.dbmanager.sqlbuilder.Update;
@@ -18,8 +19,7 @@ public class BuilderTester {
                 .set(new Equal(tableId, "c2"))
                 .where(new Where(new Equal(tableId, "c3", "1", false))
                         .addExpression(true, new Equal(tableId, "c4")));
-        System.out.println(update.toPreparedSql());
-//        System.out.println(update.toSql());
+        LoggerFactory.getLogger(BuilderTester.class).info(update.toPreparedSql());
     }
 
 }

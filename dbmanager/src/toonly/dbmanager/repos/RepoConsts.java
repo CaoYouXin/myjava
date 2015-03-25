@@ -10,4 +10,7 @@ public class RepoConsts {
     static final String PROGRAM_TB = "program";
     static final String INFO_TB = "info";
 
+    private RepoConsts() {
+    }
+
 }

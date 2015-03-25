@@ -28,38 +28,40 @@ public class ReposManager {
             return true;
         }
 
-        synchronized (this) {
-            if (this.isUpToDate.get()) {
-                return true;
+        return isUpToDateSynCheck();
+    }
+
+    private synchronized boolean isUpToDateSynCheck() throws Exception {
+        if (this.isUpToDate.get()) {
+            return true;
+        }
+
+        if (!Program.INSTANCE.isRegistered()) {
+            return false;
+        }
+
+        SW<Boolean> bool = new SW<>(true);
+        SW<Exception> e = new SW<>();
+        AppFactory.INSTANCE.forEach(appClass -> {
+            if (!bool.val()) {
+                return;
             }
 
-            if (!Program.INSTANCE.isRegistered()) {
+            Object app = AppFactory.INSTANCE.getAppObject(appClass);
+            if (app instanceof Updatable) {
+                Object ret = AppFactory.INSTANCE.invokeMethod(null, app, "needUpdateDDL");
+                this.handleRetInner(bool, e, ret);
+            }
+        });
+
+        return this.handleRetOuter(e, () -> {
+            if (bool.val()) {
+                this.isUpToDate.set(true);
+                return true;
+            } else {
                 return false;
             }
-
-            SW<Boolean> bool = new SW<>(true);
-            SW<Exception> e = new SW<>();
-            AppFactory.instance.forEach(appClass -> {
-                if (!bool.val()) {
-                    return;
-                }
-
-                Object app = AppFactory.instance.getAppObject(appClass);
-                if (app instanceof Updatable) {
-                    Object ret = AppFactory.instance.invokeMethod(null, app, "needUpdateDDL");
-                    this.handleRetInner(bool, e, ret);
-                }
-            });
-
-            return this.handleRetOuter(e, () -> {
-                if (bool.val()) {
-                    this.isUpToDate.set(true);
-                    return true;
-                } else {
-                    return false;
-                }
-            });
-        }
+        });
     }
 
     public synchronized boolean makeUpToDate(String username) throws Exception {
@@ -77,14 +79,14 @@ public class ReposManager {
         }
 
         SW<Exception> e = new SW<>();
-        AppFactory.instance.forEach(appClass -> {
+        AppFactory.INSTANCE.forEach(appClass -> {
             if (!bool.val()) {
                 return;
             }
 
-            Object app = AppFactory.instance.getAppObject(appClass);
+            Object app = AppFactory.INSTANCE.getAppObject(appClass);
             if (app instanceof Updatable) {
-                Object ret = AppFactory.instance.invokeMethod(username, app, "updateDDL");
+                Object ret = AppFactory.INSTANCE.invokeMethod(username, app, "updateDDL");
                 this.handleRetInner(bool, e, ret);
             }
         });

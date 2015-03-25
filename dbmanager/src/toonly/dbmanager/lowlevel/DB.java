@@ -16,6 +16,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import static toonly.configer.FileTool.LINE_SEPARATOR;
+
 /**
  * @author CPU
  *         <p>
@@ -36,16 +38,16 @@ public final class DB {
     //Begin 单例模式
     private static final DB INSTANCE = new DB();
     //Begin 常量定义
-    private static final String Label_DATABASE = "Database";
-    private static final String Label_TABLE = "Tables_in_%s";
+    private static final String LABEL_DATABASE = "Database";
+    private static final String LABEL_TABLE = "Tables_in_%s";
     //End 单例模式
-    private static final String Show_TABLES = "SHOW TABLES IN `%s`;";
+    private static final String SHOW_TABLES = "SHOW TABLES IN `%s`;";
     private static final String BATCH_DATA_ARE_NOT_SUPPORTED = "Batch Data are not supported.";
     private DS ds;
 
     private DB() {
         this.ds = new DS();
-        LOGGER.info("data source:{}{}", FileTool.LINE_SEPARATOR, this.ds.toString());
+        LOGGER.info("data source:{}{}", LINE_SEPARATOR, this.ds.toString());
     }
     //End 常量定义
 
@@ -78,9 +80,10 @@ public final class DB {
 
     private void debug(String sql, List<Object> params) {
         Debugger.debugRun(this, () -> {
-            LOGGER.info("SQL wa [{}]", sql);
             if (null != params && !params.isEmpty()) {
-                LOGGER.info("\tParams wa {}", params);
+                LOGGER.info("{}SQL wa [{}]{}\tParams wa {}", LINE_SEPARATOR, sql, LINE_SEPARATOR, params);
+            } else {
+                LOGGER.info("{}SQL wa [{}]", LINE_SEPARATOR, sql);
             }
         });
     }
@@ -171,11 +174,11 @@ public final class DB {
     }
 
     private String getTableLabel(String schemaName) {
-        return String.format(DB.Label_TABLE, schemaName);
+        return String.format(DB.LABEL_TABLE, schemaName);
     }
 
     private String getShowTables(String schemaName) {
-        return String.format(DB.Show_TABLES, schemaName);
+        return String.format(DB.SHOW_TABLES, schemaName);
     }
 
     public List<String> showDatabases() {
@@ -187,7 +190,7 @@ public final class DB {
              ResultSet rs = stat.executeQuery(sql)) {
             List<String> ret = new ArrayList<>();
             while (rs.next()) {
-                ret.add(rs.getString(Label_DATABASE));
+                ret.add(rs.getString(LABEL_DATABASE));
             }
             return ret;
         } catch (SQLException ex) {

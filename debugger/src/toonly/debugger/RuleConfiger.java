@@ -44,7 +44,7 @@ public class RuleConfiger extends PropsConfiger implements ChangeWatcher.ChangeL
             return;
         }
 
-        Properties props = this.watch(CONFIG_FILE_NAME).AddChangeListener(this).cache(CONFIG_FILE_NAME);
+        Properties props = this.watch(CONFIG_FILE_NAME).addChangeListener(this).cache(CONFIG_FILE_NAME);
 
         ruleListTreeNode = new RuleListTreeNode(DEFAULT_NODE_NAME, Feature.DEFAULT_RULE.isOn());
 

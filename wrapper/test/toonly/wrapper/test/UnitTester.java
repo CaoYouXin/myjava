@@ -1,6 +1,8 @@
 package toonly.wrapper.test;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import toonly.wrapper.StringWrapper;
 
 /**
@@ -8,17 +10,19 @@ import toonly.wrapper.StringWrapper;
  */
 public class UnitTester {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UnitTester.class);
+
     @Test
     public void lambdaTest() {
-        System.out.println(new StringWrapper("abc").md5Len16().val());
-        System.out.println(new StringWrapper("abc").md5Len32().val());
+        LOGGER.info(new StringWrapper("abc").md5Len16().val());
+        LOGGER.info(new StringWrapper("abc").md5Len32().val());
     }
 
     @Test
     public void iminusminus() {
         int i = 1;
-        System.out.println(i-- > 0);
-        System.out.println(i-- > 0);
+        LOGGER.info("{}", i-- > 0);
+        LOGGER.info("{}", i-- > 0);
     }
 
 }

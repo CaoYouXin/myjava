@@ -9,18 +9,19 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Cache<T> implements CachedConfiger<T> {
 
-    private static final Map<Class<?>, Cache<?>> cacheCache = new HashMap<>();
+    private static final Map<Class<?>, Cache<?>> CACHE_CACHE = new HashMap<>();
+
     private final Map<String, T> map = new ConcurrentHashMap<>();
 
     private Cache() {
     }
 
-    public synchronized static <R> Cache<R> get(Class<R> rClass) {
-        Cache<?> cache = cacheCache.get(rClass);
+    public static synchronized <R> Cache<R> get(Class<R> rClass) {
+        Cache<?> cache = CACHE_CACHE.get(rClass);
         if (null == cache) {
             cache = new Cache<R>();
         }
-        cacheCache.put(rClass, cache);
+        CACHE_CACHE.put(rClass, cache);
         return (Cache<R>) cache;
     }
 

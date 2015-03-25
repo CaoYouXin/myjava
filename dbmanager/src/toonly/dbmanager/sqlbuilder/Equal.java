@@ -24,18 +24,21 @@ public class Equal implements Expression {
 
     @Override
     public String toSql() {
-        if (null == this.expect)
+        if (null == this.expect) {
             throw new NullPointerException("inner state error.");
+        }
 
-        if (this.needWrap)
+        if (this.needWrap) {
             return String.format("%s.`%s` = `%s`", this.tableId.toSql(), this.column, this.expect);
+        }
         return String.format("%s.`%s` = %s", this.tableId.toSql(), this.column, this.expect);
     }
 
     @Override
     public String toPreparedSql() {
-        if (null != this.expect)
+        if (null != this.expect) {
             return this.toSql();
+        }
         return String.format("%s.`%s` = ?", this.tableId.toSql(), this.column);
     }
 }

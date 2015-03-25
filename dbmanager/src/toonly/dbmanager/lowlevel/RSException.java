@@ -5,6 +5,6 @@ package toonly.dbmanager.lowlevel;
  */
 public class RSException extends RuntimeException {
     public RSException(String columnLabel, String type, Object obj) {
-        super(String.format("[%s] is not a %s, but a %s.", columnLabel, type, (null == obj ? "null" : obj.getClass().getName())));
+        super(String.format("[%s] is not a %s, but a %s.", columnLabel, type, null == obj ? "null" : obj.getClass().getName()));
     }
 }

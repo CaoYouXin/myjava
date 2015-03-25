@@ -28,7 +28,7 @@ public class ChangeWatcherSupport<T> implements ChangeWatcher<T>, FileTool {
     }
 
     @Override
-    public T AddChangeListener(@NotNull ChangeListener listener) {
+    public T addChangeListener(@NotNull ChangeListener listener) {
         if (null == this.listenerList) {
             this.listenerList = new ArrayList<>();
         }

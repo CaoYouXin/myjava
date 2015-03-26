@@ -11,10 +11,11 @@ import java.util.List;
 
 /**
  * Created by cls on 15-3-13.
+ * 库表创建接口
  */
 public interface Creatable extends Entity {
 
-    public static SQL getCreate(ECCalculator ecc, TableId tableId) {
+    static SQL getCreate(ECCalculator ecc, TableId tableId) {
         List<Create.DBField> fields = new ArrayList<>();
         List<String> keyFields = ecc.getKeyFields();
 
@@ -23,31 +24,28 @@ public interface Creatable extends Entity {
         return new Create(tableId, fields);
     }
 
-    default public boolean isDatabaseExist() {
+    default boolean isDatabaseExist() {
         List<String> databases = DB.instance().showDatabases();
         return databases.contains(this.getSchemaName());
     }
 
-    default public boolean createDatabase() {
+    default boolean createDatabase() {
         synchronized (this) {
-            if (this.isDatabaseExist()) {
-                return true;
-            }
-            return DB.instance().createDatabase(this.getSchemaName());
+            return this.isDatabaseExist() || DB.instance().createDatabase(this.getSchemaName());
         }
     }
 
-    default public boolean reCreateDatabase() {
+    default boolean reCreateDatabase() {
         return DB.instance().dropDatabase(this.getSchemaName())
                 && DB.instance().createDatabase(this.getSchemaName());
     }
 
-    default public boolean isTableExist() {
+    default boolean isTableExist() {
         List<String> tables = DB.instance().showTables(this.getSchemaName());
         return tables.contains(this.getTableName());
     }
 
-    default public boolean createTable() {
+    default boolean createTable() {
         synchronized (this) {
             if (this.isTableExist()) {
                 return true;
@@ -62,7 +60,7 @@ public interface Creatable extends Entity {
         }
     }
 
-    default public boolean reCreateTable() {
+    default boolean reCreateTable() {
         ECCalculator ecc = new ECCalculator(this);
 
         TableId tableId = new TableId(this.getSchemaName(), this.getTableName());
@@ -72,8 +70,8 @@ public interface Creatable extends Entity {
         return DB.instance().simpleExecute(drop.toSql()) && DB.instance().simpleExecute(create.toSql());
     }
 
-    default public boolean createIfNeed() {
-        boolean suc = false;
+    default boolean createIfNeed() {
+        boolean suc = true;
         if (!this.isDatabaseExist()) {
             suc = this.createDatabase();
         }
@@ -85,7 +83,7 @@ public interface Creatable extends Entity {
         return suc;
     }
 
-    default public boolean ifCreateNeed() {
+    default boolean ifCreateNeed() {
         return !(this.isDatabaseExist() && this.isTableExist());
     }
 

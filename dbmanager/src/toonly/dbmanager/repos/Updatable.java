@@ -13,9 +13,9 @@ import static toonly.dbmanager.repos.RepoInfo.VERSION_COLUMN;
 public interface Updatable extends Creatable {
 
     @JsonIgnore
-    public int getVersion();
+    int getVersion();
 
-    default public boolean needUpdateDDL() {
+    default boolean needUpdateDDL() {
         if (this.ifCreateNeed()) {
             return true;
         }
@@ -23,7 +23,7 @@ public interface Updatable extends Creatable {
         RepoInfo repoInfo = getRepoInfo();
 
         RS rs = repoInfo.keySelect();
-        while (rs.next()) {
+        if (rs.next()) {
             return this.getVersion() > rs.getInt(VERSION_COLUMN);
         }
 
@@ -31,7 +31,7 @@ public interface Updatable extends Creatable {
     }
 
     @PofM(who = "S")
-    default public boolean updateDDL() {
+    default boolean updateDDL() {
         RepoInfo repoInfo = getRepoInfo();
 
         if (this.ifCreateNeed()) {
@@ -48,7 +48,7 @@ public interface Updatable extends Creatable {
         return this.reCreateTable() && repoInfo.addForDuplicated();
     }
 
-    default public RepoInfo getRepoInfo() {
+    default RepoInfo getRepoInfo() {
         RepoInfo repoInfo = new RepoInfo();
         repoInfo.setProgram(Program.INSTANCE.getName());
         repoInfo.setDb(this.getSchemaName());

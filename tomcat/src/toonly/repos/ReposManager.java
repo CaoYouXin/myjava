@@ -24,11 +24,8 @@ public class ReposManager {
     }
 
     public boolean isUpToDate() throws Exception {
-        if (this.isUpToDate.get()) {
-            return true;
-        }
+        return this.isUpToDate.get() || isUpToDateSynCheck();
 
-        return isUpToDateSynCheck();
     }
 
     private synchronized boolean isUpToDateSynCheck() throws Exception {
@@ -40,29 +37,29 @@ public class ReposManager {
             return false;
         }
 
-        SW<Boolean> bool = new SW<>(true);
+        SW<Boolean> needUpdate = new SW<>(false);
         SW<Exception> e = new SW<>();
         AppFactory.INSTANCE.forEach(appClass -> {
-            if (!bool.val()) {
+            if (needUpdate.val()) {
                 return;
             }
 
             Object app = AppFactory.INSTANCE.getAppObject(appClass);
             if (app instanceof Updatable) {
                 Object ret = AppFactory.INSTANCE.invokeMethod(null, app, "needUpdateDDL");
-                this.handleRetInner(bool, e, ret);
+                this.handleRetInner(needUpdate, e, ret);
             }
         });
 
-        return this.handleRetOuter(e, () -> returnByBool(bool));
+        return this.handleRetOuter(e, () -> returnByBool(needUpdate));
     }
 
-    private boolean returnByBool(SW<Boolean> bool) {
-        if (bool.val()) {
+    private boolean returnByBool(SW<Boolean> needUpdate) {
+        if (needUpdate.val()) {
+            return false;
+        } else {
             this.isUpToDate.set(true);
             return true;
-        } else {
-            return false;
         }
     }
 
@@ -71,29 +68,29 @@ public class ReposManager {
             return true;
         }
 
-        SW<Boolean> bool = new SW<>(true);
+        SW<Boolean> suc = new SW<>(true);
         if (!Program.INSTANCE.isRegistered()) {
-            bool.val(Program.INSTANCE.register());
+            suc.val(Program.INSTANCE.register());
         }
 
-        if (!bool.val()) {
+        if (!suc.val()) {
             return false;
         }
 
         SW<Exception> e = new SW<>();
         AppFactory.INSTANCE.forEach(appClass -> {
-            if (!bool.val()) {
+            if (!suc.val()) {
                 return;
             }
 
             Object app = AppFactory.INSTANCE.getAppObject(appClass);
             if (app instanceof Updatable) {
                 Object ret = AppFactory.INSTANCE.invokeMethod(username, app, "updateDDL");
-                this.handleRetInner(bool, e, ret);
+                this.handleRetInner(suc, e, ret);
             }
         });
 
-        return handleRetOuter(e, bool::val);
+        return handleRetOuter(e, suc::val);
     }
 
     private void handleRetInner(SW<Boolean> bool, SW<Exception> e, Object ret) {

@@ -4,16 +4,11 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>测试系统</title>
     <style>
-        * {
-            font-family: "Source Code Pro", "sans-serif";
-        }
-
         a {
             text-align: center;
-            width: 350px;
-            padding: 5px 20px;
+            padding: 0px 20px 0px 20px;
             cursor: default;
-            border: 2px solid #a1a1a1;
+            border: 1px solid #a1a1a1;
             border-radius: 10px;
             -moz-border-radius: 10px; /* 老的 Firefox */
         }
@@ -23,13 +18,13 @@
         }
     </style>
     <script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="js/jquery.caret.js"></script>
     <script type="text/javascript" src="js/md5.js"></script>
     <script type="text/javascript">
         $(function () {
-            $("#send").click(function(e) {
-                console.log(e);
+            $("#send").click(function() {
                 var url = $("#url").val();
-                var postData = $("#data").val();
+                var postData = jQuery.parseJSON( $("#data").val() );
                 alert(url + postData);
                 $.ajax(url, {
                     type: "POST",
@@ -37,7 +32,7 @@
                     dataType: "text",
                     success: function (data, textStatus, jqXHR) {
                         console.log(data + "！！！" + textStatus + "！！！" + jqXHR);
-                        $("#console").html(data);
+                        $("#console").val(data);
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
                         alert("有问题啦！！！" + jqXHR + "！！！" + textStatus + "！！！" + errorThrown);
@@ -46,16 +41,41 @@
                     }
                 });
             });
+            var data = $("#data");
+            data.keyup(function(e) {
+                var caret = data.caret();
+                var val = data.val();
+                var isChanged = false;
+                if ( e.keyCode == 222 ) {
+                    if ( e.shiftKey ) {
+                        val = val.substring(0, caret) + "\"" + val.substring(caret);
+                    } else {
+                        val = val.substring(0, caret) + "\'" + val.substring(caret);
+                    }
+                    isChanged = true;
+                }
+                if ( e.keyCode == 219 ) {
+                    if ( e.shiftKey ) {
+                        val = val.substring(0, caret) + "}" + val.substring(caret);
+                    } else {
+                        val = val.substring(0, caret) + "]" + val.substring(caret);
+                    }
+                }
+                if ( isChanged ) {
+                    data.val(val);
+                    data.caret(caret);
+                }
+            });
         });
     </script>
 </head>
 
 <body>
 
-<textarea id="url" rows="1" cols="80">/api/v1/</textarea>
-<a id="send">send</a><br>
-<textarea id="data" rows="5" cols="80"></textarea><br>
-<textarea id="console" rows="5" cols="80" readonly></textarea>
+<textarea id="url" rows="1" cols="50">/api/v1/</textarea>
+<a id="send">send</a><br><hr>
+<textarea id="data" rows="5" cols="56"></textarea><br>
+<textarea id="console" rows="5" cols="56" readonly></textarea>
 
 
 </body>

@@ -10,14 +10,26 @@ import toonly.mapper.ParamConstructable;
  */
 public class User implements Updatable, Addable, Delable, Modable, Selable, Jsonable, ParamConstructable {
 
-    @Column @KeyColumn @DT(type = DT.Type.INTEGER)
+    @Column
+    @KeyColumn
+    @DT(type = DT.Type.INTEGER)
     private int id;
-    @Column @DuplicatedColumn @DT(type = DT.Type.SHORTTEXT)
-    private String name;
+    @Column
+    @DuplicatedColumn
+    @DT(type = DT.Type.SHORTTEXT)
+    private String username;
+    @Column
+    @DuplicatedColumn
+    @DT(type = DT.Type.SHORTTEXT)
+    private String password;
+    @Column
+    @DuplicatedColumn
+    @DT(type = DT.Type.SHORTTEXT)
+    private String permission;
 
     public User(int id, String name) {
         this.id = id;
-        this.name = name;
+        this.username = name;
     }
 
     public User() {
@@ -27,8 +39,8 @@ public class User implements Updatable, Addable, Delable, Modable, Selable, Json
         return id;
     }
 
-    public String getName() {
-        return name;
+    public String getUsername() {
+        return username;
     }
 
     @Override
@@ -45,12 +57,14 @@ public class User implements Updatable, Addable, Delable, Modable, Selable, Json
     public String toString() {
         return "User{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", permission='" + permission + '\'' +
                 '}';
     }
 
     @Override
     public int getVersion() {
-        return 0;
+        return 1;
     }
 }

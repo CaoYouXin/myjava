@@ -3,3 +3,5 @@ toonly.dbmanager.lowlevel.DB=true
 toonly.boots.ServletUser=true
 #登录测试帐号
 toonly.boots.BootsFilter=true
+#打印http信息
+toonly.mapper.FlagMapper=true

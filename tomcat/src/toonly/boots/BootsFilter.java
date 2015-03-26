@@ -10,17 +10,13 @@ import toonly.dbmanager.lowlevel.DB;
 import toonly.debugger.BugReporter;
 import toonly.debugger.Debugger;
 import toonly.debugger.Feature;
-import toonly.mapper.FlagMapper;
 import toonly.mapper.ret.RB;
 import toonly.repos.ReposManager;
 import toonly.wrapper.StringWrapper;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
+import javax.servlet.http.*;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -29,8 +25,8 @@ import java.util.Properties;
 
 import static toonly.boots.ServletUser.sysLogin;
 import static toonly.mapper.FlagMapper.CHARSET_NAME;
-import static toonly.mapper.ret.RB.RB_KEY_PROBLEM;
-import static toonly.mapper.ret.RB.RB_KEY_SUC;
+import static toonly.mapper.FlagMapper.sendResponse;
+import static toonly.mapper.ret.RB.*;
 
 
 /**
@@ -39,19 +35,21 @@ import static toonly.mapper.ret.RB.RB_KEY_SUC;
 @WebFilter(filterName = "boots&shutdown", urlPatterns = "/*")
 public class BootsFilter implements Filter {
 
+    public static final String INIT_PAGE = "init_page";
+    public static final String DEFAULT_INIT_PAGE = "/init.html";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(BootsFilter.class);
     private static final String CONFIG_FILE_NAME = "redirect.prop";
     private static final String LOGIN_PAGE = "login_page";
     private static final String DEFAULT_LOGIN_PAGE = "/login.html";
     private static final String LOGIN_FAIL_PAGE = "login_fail";
     private static final String DEFAULT_LOGIN_FAIL_PAGE = "/login.html#fail";
-    private static final String INIT_PAGE = "init_page";
-    private static final String DEFAULT_INIT_PAGE = "/init.html";
     private static final String HOME_PAGE = "home_page";
     private static final String DEFAULT_HOME_PAGE = "/index.jsp";
     private static final String ADMIN_HOME_PAGE = "admin_home";
     private static final String DEFAULT_ADMIN_HOME_PAGE = "/index.jsp#stuff";
     private static final String API_V1 = "/api/v1";
+    private static final String EXP_BLOCK = "503";
     private Properties configer;
     private List<String> matchers;
 
@@ -99,7 +97,7 @@ public class BootsFilter implements Filter {
         if (user.isLogin()) {
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
-            redirect(servletResponse, LOGIN_PAGE, DEFAULT_LOGIN_PAGE);
+            sendResponse((HttpServletResponse) servletResponse, new RB().put(RB.RB_KEY_EXP, "not login"));
         }
     }
 
@@ -117,6 +115,9 @@ public class BootsFilter implements Filter {
          */
         if (stringWrapper.matchFrom0("/login.do")) {
             if (user.login()) {
+                Cookie un = new Cookie("un", user.getUserName().toString());
+                un.setMaxAge(-1);
+                ((HttpServletResponse) servletResponse).addCookie(un);
                 if (user.isAdmin()) {
                     redirect(servletResponse, ADMIN_HOME_PAGE, DEFAULT_ADMIN_HOME_PAGE);
                 } else {
@@ -136,10 +137,9 @@ public class BootsFilter implements Filter {
 
     private boolean normal(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain, StringWrapper stringWrapper, ServletUser user) throws IOException, ServletException {
         /**
-         * 将用户名传给jsp
+         * 将用户名传给Req，用作后续操作
          */
-        if (stringWrapper.val().endsWith(".jsp")
-                || stringWrapper.matchFrom0(API_V1)) {
+        if (stringWrapper.matchFrom0(API_V1)) {
             servletRequest.setAttribute("un", user.getUserName());
         }
 
@@ -166,7 +166,7 @@ public class BootsFilter implements Filter {
                 return true;
             }
             RB ret = new RB().put("suc", b);
-            FlagMapper.sendResponse(servletResponse, ret);
+            sendResponse(servletResponse, ret);
             if (b) {
                 user.logout();
             }
@@ -178,9 +178,9 @@ public class BootsFilter implements Filter {
     private void updateDBFail(Exception e, HttpServletResponse servletResponse) throws IOException {
         RB ret = new RB().put(RB_KEY_SUC, false);
         if (e instanceof UnPermissioned) {
-            FlagMapper.sendResponse(servletResponse, ret.put(RB_KEY_PROBLEM, "unpermissioned"));
+            sendResponse(servletResponse, ret.put(RB_KEY_PROBLEM, RB_BLOCK));
         } else if (e instanceof InvokeAppError) {
-            servletResponse.sendError(500);
+            sendResponse(servletResponse, ret.put(RB_KEY_PROBLEM, RB_ERROR));
         }
     }
 
@@ -191,7 +191,7 @@ public class BootsFilter implements Filter {
          * 保护《某些》目录
          */
         if (stringWrapper.matchFrom0(this.matchers)) {
-            response.sendError(503);
+            sendResponse(response, new RB().put(RB_KEY_EXP, EXP_BLOCK));
             return true;
         }
 
@@ -199,7 +199,7 @@ public class BootsFilter implements Filter {
          * 系统调试阶段，只有管理员可以进入
          */
         if (SysStatus.isDebugging() && !user.isAdmin()) {
-            response.sendError(503);
+            sendResponse(response, new RB().put(RB_KEY_EXP, EXP_BLOCK));
             return true;
         }
 

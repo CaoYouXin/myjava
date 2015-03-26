@@ -7,6 +7,7 @@ package toonly.dbmanager.lowlevel;
 
 import org.slf4j.LoggerFactory;
 import toonly.debugger.Debugger;
+import toonly.wrapper.SW;
 
 import java.nio.charset.Charset;
 import java.sql.*;
@@ -137,21 +138,71 @@ public final class DB {
         String select = "SELECT";
         String from = "FROM";
         String labelSql = sql.substring(upperSql.indexOf(select) + select.length(), upperSql.indexOf(from));
-        String[] labels = labelSql.split(",");
-        for (int i = 0; i < labels.length; i++) {
-            String label = labels[i];
-            if (label.contains("`")) {
-                label = label.replaceAll("`", "");
-            }
-            if (label.toLowerCase().contains("as")) {
-                labels[i] = label.substring(label.toLowerCase().indexOf("as") + 2).trim();
-            } else if (label.contains(".")) {
-                labels[i] = label.substring(label.indexOf(".") + 1).trim();
-            } else {
-                labels[i] = label.trim();
+        List<String> labels = new ArrayList<>();
+        this.readCharByChar(labelSql.toCharArray(), labels);
+        return labels.toArray(new String[0]);
+    }
+
+    private void readCharByChar(char[] chars, List<String> labels) {
+        SW<ParseStatus> sw = new SW<>(ParseStatus.READY);
+        StringBuilder sb = new StringBuilder("");
+        for (char c : chars) {
+            switch (c) {
+                case '`':
+                    this.readWrapWord(sw, sb, labels);
+                    break;
+                default:
+                    this.readNormalWord(sw, c, sb);
             }
         }
-        return labels;
+    }
+
+    private void readNormalWord(SW<ParseStatus> sw, char c, StringBuilder sb) {
+        switch (sw.val()) {
+            case START_A_NAME:
+                sb.append(c);
+                break;
+            case READY_FOR_NAME:
+                if ('a' == c || 'A' == c) {
+                    sw.val(ParseStatus.START_AS);
+                }
+                if (',' == c) {
+                    sw.val(ParseStatus.READY);
+                }
+                break;
+            case START_A_ALIAS:
+                sb.append(c);
+                break;
+            default:
+                if (' ' == c) {
+                    break;
+                }
+                throw new ParseLabelException(sw, c, "readNormalWord");
+        }
+    }
+
+    private void readWrapWord(SW<ParseStatus> sw, StringBuilder sb, List<String> labels) {
+        switch (sw.val()) {
+            case READY:
+                sw.val(ParseStatus.START_A_NAME);
+                break;
+            case START_A_NAME:
+                labels.add(sb.toString());
+                sb.delete(0, sb.length());
+                sw.val(ParseStatus.READY_FOR_NAME);
+                break;
+            case START_AS:
+                sw.val(ParseStatus.START_A_ALIAS);
+                break;
+            case START_A_ALIAS:
+                labels.remove(labels.size() - 1);
+                labels.add(sb.toString());
+                sb.delete(0, sb.length());
+                sw.val(ParseStatus.READY_FOR_NAME);
+                break;
+            default:
+                throw new ParseLabelException(sw, '`', "readWrapWord");
+        }
     }
 
     public List<String> showTables(String schemaName) {
@@ -408,5 +459,15 @@ public final class DB {
 
     public boolean dropDatabase(String schemaName) {
         return this.simpleExecute(String.format("DROP DATABASE IF EXISTS `%s`", schemaName));
+    }
+
+    private enum ParseStatus {
+        READY, START_A_NAME, READY_FOR_NAME, START_AS, START_A_ALIAS
+    }
+
+    private static class ParseLabelException extends RuntimeException {
+        public ParseLabelException(SW<ParseStatus> sw, char c, String when) {
+            super(String.format("state : %s, char : %c. when %s", sw.val().name(), c, when));
+        }
     }
 }

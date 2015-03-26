@@ -28,11 +28,16 @@
         $("#update").click(function(event) {
             $.getJSON( "/init.do", function( data ) {
                 $.each( data, function( key, val ) {
-                    if (val == "True") {
-                        window.location.href = "/login.html";
-                    } else {
-                        alert("数据库更新出问题了，请“举报bug”！");
+                    if (key == "suc") {
+                        if (val == "True") {
+                            window.location.href = "/login.html";
+                            return;
+                        }
+                    } else if (key == "problem") {
+                        alert("数据库更新出问题[ "+val+" ]了，请“举报bug”！");
+                        return;
                     }
+                    alert("数据库更新出问题了，请“举报bug”！");
                 });
             });
         });

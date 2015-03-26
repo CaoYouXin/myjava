@@ -26,6 +26,9 @@ public class UserSelecter {
     private static final String PERMISSION_KEY = "permission";
     private static final String DEFAULT_PERMISSION_VALUE = PERMISSION_KEY;
     private static final String PERMISSION_FIELD = CONFIGS.getProperty(PERMISSION_KEY, DEFAULT_PERMISSION_VALUE);
+    private static final String VERSION_KEY = "version";
+    private static final String DEFAULT_VERSION_VALUE = "0";
+    private static final String VERSION_FIELD = CONFIGS.getProperty(VERSION_KEY, DEFAULT_VERSION_VALUE);
     private static final String USER_DB = CONFIGS.getProperty("schema", "userdb");
     private static final String USER_TABLE = CONFIGS.getProperty("table", "user");
 
@@ -36,7 +39,7 @@ public class UserSelecter {
         Updatable updatable = new Updatable() {
             @Override
             public int getVersion() {
-                return 0;
+                return Integer.valueOf(VERSION_FIELD);
             }
 
             @Override

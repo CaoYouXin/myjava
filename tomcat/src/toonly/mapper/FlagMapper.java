@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import toonly.appobj.AppFactory;
 import toonly.appobj.UnPermissioned;
-import toonly.configer.PropsConfiger;
 import toonly.dbmanager.base.Jsonable;
 import toonly.dbmanager.lowlevel.RS;
 import toonly.debugger.Debugger;
@@ -23,24 +22,32 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 
-import static toonly.mapper.ret.RB.RB_KEY_PROBLEM;
-import static toonly.mapper.ret.RB.RB_KEY_SUC;
+import static toonly.mapper.ret.RB.*;
 
 /**
  * Created by caoyouxin on 15-2-25.
  */
-@WebServlet(name = "flag_mapper", urlPatterns = { "/api/v1/*" })
+@WebServlet(name = "flag_mapper", urlPatterns = {"/api/v1/*"})
 public class FlagMapper extends HttpServlet {
 
     public static final String CHARSET_NAME = "UTF-8";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FlagMapper.class);
-    private static final String CONFIG_FILE_NAME = "redirect.prop";
 
-    private ThreadLocal<String> line1 = new ThreadLocal<>();
-    private Properties redirectConfiger = new PropsConfiger().cache(CONFIG_FILE_NAME);
+    private final ThreadLocal<String> line1 = new ThreadLocal<>();
+
+    public static void sendResponse(HttpServletResponse resp, RB ret) throws IOException {
+        resp.addHeader("Content-Type", "application/json;charset=" + CHARSET_NAME);
+        ServletOutputStream outputStream = resp.getOutputStream();
+        outputStream.write(ret.toJson().getBytes(CHARSET_NAME));
+        outputStream.flush();
+        outputStream.close();
+    }
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -105,12 +112,14 @@ public class FlagMapper extends HttpServlet {
 
     private boolean checkDBStatus(HttpServletResponse resp) throws IOException {
         try {
-            if (!ReposManager.INSTANCE.isUpToDate()) {
-                resp.sendRedirect(this.redirectConfiger.getProperty("init_page", "/init.html"));
+            boolean upToDate = ReposManager.INSTANCE.isUpToDate();
+            Debugger.debugRun(this, () -> LOGGER.info("Q:is db up to date? A:{}", upToDate));
+            if (!upToDate) {
+                sendResponse(resp, new RB().put(RB_KEY_EXP, "dbuninit"));
                 return true;
             }
         } catch (Exception e) {
-            resp.sendError(500);
+            sendResponse(resp, new RB().put(RB_KEY_EXP, RB_ERROR));
             return true;
         }
         return false;
@@ -187,14 +196,6 @@ public class FlagMapper extends HttpServlet {
         }
     }
 
-    public static void sendResponse(HttpServletResponse resp, RB ret) throws IOException {
-        resp.addHeader("Content-Type", "application/json;charset=" + CHARSET_NAME);
-        ServletOutputStream outputStream = resp.getOutputStream();
-        outputStream.write(ret.toJson().getBytes(CHARSET_NAME));
-        outputStream.flush();
-        outputStream.close();
-    }
-
     private void printRequest(HttpServletRequest req) throws IOException {
         req.setCharacterEncoding(CHARSET_NAME);
 
@@ -225,7 +226,7 @@ public class FlagMapper extends HttpServlet {
         }
 
         req.getParameterMap().forEach((parameterName, parameters) ->
-            LOGGER.info("param[{} :({})]", parameterName, Arrays.toString(parameters))
+                        LOGGER.info("param[{} :({})]", parameterName, Arrays.toString(parameters))
         );
 
         LOGGER.info("line({}) : {}", 1, line1.get());

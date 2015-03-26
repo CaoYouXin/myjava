@@ -1,88 +1,62 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html>
 <html>
-	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<title>樂之道服装仓库系统</title>
-		<style>
-			* {
-				font-family: "文泉驿等宽正黑","微软雅黑","宋体";
-			}
-			a {
-				text-align:center;
-				width:350px;
-				padding:5px 20px;
-				cursor:default;
-				border:2px solid #a1a1a1;
-				border-radius:10px;
-				-moz-border-radius:10px; /* 老的 Firefox */
-			}
-			a:hover {
-				background:#dddddd;
-			}
-		</style>
-		<script type="text/javascript" src="js/jquery-2.1.1.js"></script>
-		<script type="text/javascript" src="js/md5.js"></script>
-		<script type="text/javascript">
-			$(document).ready(function() {
-				//        alert(hex_md5("12312312312312"));
-				$("#init").hide();
-				$("#toLogin").hide();
-				$.ajax({
-					url: "/MessageDispatcher",
-					type: "POST",
-					data: {target: "init", message: "needInit"},
-					dataType: "json",
-					success: function(data) {
-						var ret = data.msg;
-						if (null !== ret.match("True")) {
-							$("#init").show();
-						} else {
-							$("#toLogin").show("slow");
-						}
-					},
-					error: function(request, errorMessage, thrownEx) {
-						alert("这就有问题啦！！！" + request + "！！！" + errorMessage + "！！！" + thrownEx);
-					}
-				});
-				$("#init").click(function() {
-					$.ajax({
-						url: "/ssh/MessageDispatcher",
-						type: "POST",
-						data: {target: "init", message: "init"},
-						dataType: "json",
-						success: function(data) {
-							var ret = data.msg;
-							if (ret.match("True")) {
-								$("#init").hide();
-								$("#toLogin").show("slow");
-								ret = ret.substring(ret.indexOf("True") + 4);
-							} else {
-								ret = ret.substring(ret.indexOf("False") + 5);
-							}
-							$("#console").html(ret);
-						},
-						error: function(request, errorMessage, thrownEx) {
-							alert("这就有问题啦！！！" + request + "！！！" + errorMessage + "！！！" + thrownEx);
-						}
-					});
-					$("#init").hide();
-					$("#console").html("请不要进行任何操作，耐心等待。。。");
-				});
-				$("#toLogin").click(function() {
-					self.location = "/ssh/examples/desktop/desktop.html?theme=gray";
-				});
-			});
-		</script>
-	</head>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>测试系统</title>
+    <style>
+        * {
+            font-family: "Source Code Pro", "sans-serif";
+        }
 
-	<body>
+        a {
+            text-align: center;
+            width: 350px;
+            padding: 5px 20px;
+            cursor: default;
+            border: 2px solid #a1a1a1;
+            border-radius: 10px;
+            -moz-border-radius: 10px; /* 老的 Firefox */
+        }
 
-		<div id="initdiv">
-			<h1><a id="toLogin">樂之道服装仓库系统->点击进入</a></h1>
-			<!--<h6><a>测试->点击进入</a></h6>-->
-			<h2><a id="init">初始化</a></h2>
-			<div id="console"></div>
-		</div>
+        a:hover {
+            background: #dddddd;
+        }
+    </style>
+    <script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="js/md5.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#send").click(function(e) {
+                console.log(e);
+                var url = $("#url").val();
+                var postData = $("#data").val();
+                alert(url + postData);
+                $.ajax(url, {
+                    type: "POST",
+                    data: postData,
+                    dataType: "text",
+                    success: function (data, textStatus, jqXHR) {
+                        console.log(data + "！！！" + textStatus + "！！！" + jqXHR);
+                        $("#console").html(data);
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        alert("有问题啦！！！" + jqXHR + "！！！" + textStatus + "！！！" + errorThrown);
+                        alert(jqXHR.status);
+                        alert(jqXHR.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+</head>
 
-	</body>
+<body>
+
+<textarea id="url" rows="1" cols="80">/api/v1/</textarea>
+<a id="send">send</a><br>
+<textarea id="data" rows="5" cols="80"></textarea><br>
+<textarea id="console" rows="5" cols="80" readonly></textarea>
+
+
+</body>
 </html>

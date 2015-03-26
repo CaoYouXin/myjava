@@ -10,6 +10,7 @@
 <!--[if IE 9]><link href="css/ie9.css" rel="stylesheet" type="text/css" /><![endif]-->
 
 <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="js/jquery.cookie.js"></script>
 <script type="text/javascript" src="js/jquery-ui-1.9.2.min.js"></script>
 
 <script type="text/javascript" src="js/plugins/ui/jquery.easytabs.min.js"></script>
@@ -19,12 +20,22 @@
 <script type="text/javascript" src="js/files/bootstrap.min.js"></script>
 
 <script type="text/javascript" src="js/files/functions_blank.js"></script>
+<script type="text/javascript" src="js/user/user.cookie.js"></script>
 
 <script type="text/javascript">
 	$(function(){
+		$(document).ajaxComplete(function( event, xhr, settings ) {
+			console.log( "Triggered ajaxComplete handler. The status is " + xhr.status + ", result is " + xhr.responseText );
+		});
+
+		var username = getUserName();
+		alert("当前用户：" +username);
 
         $("#search_btn").click(function(event) {
             console.log($("#form").serialize());
+			$.post('/api/v1/entity/goods/add', function(data) {
+				console.log(data);
+			});
         });
 	});
 </script>
@@ -72,9 +83,8 @@
 		    	<!-- /search widget -->
 
 				<!-- Ajax Form -->
-				<form method="post" action="/api/v1/entity/goods/add" class="form-horizontal" id="form">
-					<input type="hidden" name="un" value="<%=request.getAttribute("un").toString()%>" />
-                    <fieldset>
+				<form method="post" class="form-horizontal" id="form">
+					<fieldset>
 						<div class="widget row-fluid">
 							<div class="well">
 								<div class="alert margin">

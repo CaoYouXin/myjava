@@ -20,6 +20,10 @@ public class RB {
 
     public static final String RB_KEY_SUC = "suc";
     public static final String RB_KEY_PROBLEM = "problem";
+    public static final String RB_KEY_EXP = "exp";
+
+    public static final String RB_BLOCK = "503";
+    public static final String RB_ERROR = "500";
 
     private Map<String, Object> normalData;
 

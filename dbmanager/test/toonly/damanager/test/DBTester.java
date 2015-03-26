@@ -28,7 +28,8 @@ public class DBTester {
         Method parseLabels = DB.class.getDeclaredMethod("parseLabels", String.class);
         boolean accessible = parseLabels.isAccessible();
         parseLabels.setAccessible(true);
-        Object invoke = parseLabels.invoke(DB.instance(), "SELECT `name`, `version` FROM `repodb`.`program` WHERE `repodb`.`program`.`name` = ?");
+//        Object invoke = parseLabels.invoke(DB.instance(), "SELECT `name`, `version` FROM `repodb`.`program` WHERE `repodb`.`program`.`name` = ?");
+        Object invoke = parseLabels.invoke(DB.instance(), "SELECT `username`, `password`, `permission` FROM `storehouse`.`user` WHERE `storehouse`.`user`.`username` = ?");
         parseLabels.setAccessible(accessible);
         if (invoke instanceof String[]) {
             LOGGER.info("{}", Arrays.asList((String[]) invoke));

@@ -6,7 +6,7 @@
     <style>
         a {
             text-align: center;
-            padding: 0px 20px 0px 20px;
+            padding: 0 20px 0 20px;
             cursor: default;
             border: 1px solid #a1a1a1;
             border-radius: 10px;
@@ -19,13 +19,20 @@
     </style>
     <script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
     <script type="text/javascript" src="js/jquery.caret.js"></script>
+    <script type="text/javascript" src="js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="js/user/user.cookie.js"></script>
     <script type="text/javascript" src="js/md5.js"></script>
     <script type="text/javascript">
         $(function () {
             $("#send").click(function() {
                 var url = $("#url").val();
-                var postData = jQuery.parseJSON( $("#data").val() );
-                alert(url + postData);
+                var postData;
+                try {
+                    postData = jQuery.parseJSON($("#data").val());
+                } catch ( e ) {
+                    postData = {};
+                }
+                postData.un = getUserName();
                 $.ajax(url, {
                     type: "POST",
                     data: postData,
@@ -76,7 +83,7 @@
 <a id="send">send</a><br><hr>
 <textarea id="data" rows="5" cols="56"></textarea><br>
 <textarea id="console" rows="5" cols="56" readonly></textarea>
-
+<br><hr>
 
 </body>
 </html>

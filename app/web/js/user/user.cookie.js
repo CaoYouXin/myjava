@@ -4,6 +4,9 @@
 
 function getUserName() {
     var username = $.cookie("un");
-    console.info("username = " + username);
-    return username;
+    if ( username ) {
+        console.info("username = " + username);
+        return username;
+    }
+    return null;
 }

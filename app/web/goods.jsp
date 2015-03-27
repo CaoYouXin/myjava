@@ -17,12 +17,13 @@
     <script type="text/javascript" src="js/plugins/ui/jquery.easytabs.min.js"></script>
     <script type="text/javascript" src="js/plugins/ui/jquery.collapsible.min.js"></script>
     <script type="text/javascript" src="js/plugins/ui/jquery.fancybox.js"></script>
+    <script type="text/javascript" src="js/plugins/ui/jquery.bootbox.min.js"></script>
 
     <script type="text/javascript" src="js/plugins/forms/jquery.uniform.min.js"></script>
 
     <script type="text/javascript" src="js/plugins/jquery.cookie.js"></script>
 
-    <script type="text/javascript" src="js/user/user.cookie.js"></script>
+    <script type="text/javascript" src="js/user/user.util.js"></script>
 
     <script type="text/javascript" src="js/util/form.util.js"></script>
     <script type="text/javascript" src="js/util/ajax.util.js"></script>
@@ -37,22 +38,28 @@
             var username = getUserName();
             alert("当前用户：" + username);
 
+            function successHandler(data) {
+                if (data.suc === 'True') {
+                    $("#data-table").find("tbody").empty();
+                    $.each(data.data, function (i, goods) {
+                        $("#data-table").find("tbody").append(goodsRow(goods));
+                    });
+                    $(".styled").uniform({radioClass: 'choice'});
+                }
+            }
+
+            setGlobalHandler(successHandler);
+
             $("#search_btn").click(function () {
+                var url = '/api/v1/entity/goods/filterSelect';
                 var formData = getFormJson($("#form"));
+                setLastCmd(url, formData);
                 formData.un = getUserName();
-                $.ajax('/api/v1/entity/goods/filterSelect', {
+                $.ajax(url, {
                     type: "POST",
                     data: formData,
                     dataType: "json",
-                    success: function (data) {
-                        if (data.suc === 'True') {
-                            $("#data-table").find("tbody").empty();
-                            $.each(data.data, function (i, goods) {
-                                $("#data-table").find("tbody").append(goodsRow(goods));
-                            });
-                            $(".styled").uniform({radioClass: 'choice'});
-                        }
-                    },
+                    success: successHandler,
                     error: function (jqXHR, textStatus, errorThrown) {
                         alert("有问题啦！！！" + jqXHR + "！！！" + textStatus + "！！！" + errorThrown);
                         alert("问题详情（返回状态）！！！" + jqXHR.status);

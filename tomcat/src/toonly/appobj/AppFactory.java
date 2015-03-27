@@ -5,9 +5,9 @@ import org.slf4j.LoggerFactory;
 import toonly.boots.ServletUser;
 import toonly.configer.PropsConfiger;
 import toonly.configer.watcher.ChangeWatcher;
-import toonly.dbmanager.permission.DMethod;
 import toonly.dbmanager.permission.P;
 import toonly.dbmanager.permission.PofC;
+import toonly.dbmanager.permission.PofCs;
 import toonly.dbmanager.permission.PofM;
 import toonly.debugger.BugReporter;
 import toonly.debugger.Debugger;
@@ -92,19 +92,13 @@ public class AppFactory implements ChangeWatcher.ChangeListener {
         String userP = ServletUser.getPermission(username);
         Class<?> aClass = app.getClass();
 
-        boolean permission = checkClassPermission(methodName, userP, aClass);
+        CheckResult checkResult = checkClassPermission(methodName, userP, aClass);
         try {
             Method method = aClass.getMethod(methodName);
-            if (permission) {
-                return method.invoke(app);
+            if (checkResult.isChecked) {
+                return this.useClassPermission(username, app, methodName, aClass, checkResult, method);
             } else {
-                PofM pofM = method.getDeclaredAnnotation(PofM.class);
-                permission = null == pofM ? true : pofM.who().contains(userP);
-                if (permission) {
-                    return method.invoke(app);
-                } else {
-                    return new UnPermissioned(aClass.getName(), methodName, username);
-                }
+                return this.useMethodPermission(username, app, methodName, userP, aClass, method);
             }
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             BugReporter.reportBug(this, "app[" + aClass.getName() + "] 在 执行调用[" + methodName + "] 的时候，不幸遇难。", e);
@@ -112,17 +106,62 @@ public class AppFactory implements ChangeWatcher.ChangeListener {
         }
     }
 
-    private boolean checkClassPermission(String methodName, String userP, Class<?> aClass) {
+    private Object useClassPermission(String username, Object app, String methodName, Class<?> aClass, CheckResult checkResult, Method method) throws IllegalAccessException, InvocationTargetException {
+        LOGGER.info("use class p : {}", checkResult.isPermitted);
+        if (checkResult.isPermitted) {
+            return method.invoke(app);
+        } else {
+            return new UnPermissioned(aClass.getName(), methodName, username);
+        }
+    }
+
+    private Object useMethodPermission(String username, Object app, String methodName, String userP, Class<?> aClass, Method method) throws IllegalAccessException, InvocationTargetException {
+        PofM pofM = method.getDeclaredAnnotation(PofM.class);
+        boolean isPermitted = null == pofM || pofM.who().contains(userP);
+        LOGGER.info("use method p : {}", isPermitted);
+        if (isPermitted) {
+            return method.invoke(app);
+        } else {
+            return new UnPermissioned(aClass.getName(), methodName, username);
+        }
+    }
+
+    private CheckResult checkClassPermission(String methodName, String userP, Class<?> aClass) {
         boolean permission = P.S.equals(userP);
-        PofC pofC = aClass.getDeclaredAnnotation(PofC.class);
-        if (!permission && null != pofC) {
-            for (DMethod p : pofC.ps()) {
-                if (p.name().equals(methodName)) {
-                    permission = p.who().contains(userP);
-                    break;
+
+        PofCs pofCs = aClass.getDeclaredAnnotation(PofCs.class);
+        if (!permission && null != pofCs) {
+            for (PofC p : pofCs.value()) {
+                if (p.method().val().equals(methodName)) {
+                    return new CheckResult(true, p.who().contains(userP));
                 }
             }
         }
-        return permission;
+
+        PofC pofC = aClass.getDeclaredAnnotation(PofC.class);
+        if (!permission && null != pofC && pofC.method().val().equals(methodName)) {
+            return new CheckResult(true, pofC.who().contains(userP));
+        }
+
+        if (permission) {
+            return new CheckResult(true, true);
+        } else {
+            return new CheckResult(false);
+        }
     }
+
+    private static class CheckResult {
+        private boolean isChecked;
+        private boolean isPermitted;
+
+        public CheckResult(boolean isChecked, boolean isPermitted) {
+            this.isChecked = isChecked;
+            this.isPermitted = isPermitted;
+        }
+
+        public CheckResult(boolean isChecked) {
+            this.isChecked = isChecked;
+        }
+    }
+
 }

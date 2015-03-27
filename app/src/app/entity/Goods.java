@@ -2,12 +2,16 @@ package app.entity;
 
 import toonly.dbmanager.base.*;
 import toonly.dbmanager.lowlevel.DT;
+import toonly.dbmanager.permission.P;
+import toonly.dbmanager.permission.PofCs;
+import toonly.dbmanager.permission.PofC;
 import toonly.dbmanager.repos.Updatable;
 import toonly.mapper.ParamConstructable;
 
 /**
  * Created by cls on 15-3-13.
  */
+@PofC(method = Mstr.FILTER_SELECT, who = P.S)
 public class Goods implements Updatable, Addable, Delable, Modable, Selable, Jsonable, ParamConstructable {
 
     @Column @KeyColumn @DT(type = DT.Type.SHORTTEXT) private String code;

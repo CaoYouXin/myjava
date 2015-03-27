@@ -1,5 +1,7 @@
 package toonly.dbmanager.permission;
 
+import toonly.dbmanager.base.Mstr;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -12,5 +14,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface PofC {
-    DMethod[] ps();
+    Mstr method();
+    String who();
 }

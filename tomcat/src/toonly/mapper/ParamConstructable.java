@@ -19,10 +19,19 @@ import java.util.function.Function;
  */
 public interface ParamConstructable extends Entity {
 
+    static <T> T asT(Map<String, String[]> data, String key, Function<String, T> fn) {
+        String[] strings = data.get(key);
+        if (null != strings && 0 < strings.length && !strings[0].isEmpty()) {
+            return fn.apply(strings[0]);
+        }
+        LoggerFactory.getLogger(ParamConstructable.class).info("cannot read from params, field : {}", key);
+        return null;
+    }
+
     default boolean construct(Map<String, String[]> data) {
         ECCalculator ecc = new ECCalculator(this);
 
-        SW<Boolean> suc = new SW(true);
+        SW<Boolean> suc = new SW<>(true);
         ecc.dtForEach((f, dt) -> {
             Object o = null;
             switch (dt.type()) {
@@ -32,7 +41,8 @@ public interface ParamConstructable extends Entity {
                 case LONG:
                     o = asT(data, f, Long::valueOf);
                     break;
-                case SHORTTEXT:case LONGTEXT:
+                case SHORTTEXT:
+                case LONGTEXT:
                     o = asT(data, f, str -> str);
                     break;
                 case BOOLEAN:
@@ -48,7 +58,7 @@ public interface ParamConstructable extends Entity {
             if (null != o) {
                 ecc.setValue(f, o);
             } else if (suc.val()) {
-                Map<String, List<String>> printMap = new HashMap();
+                Map<String, List<String>> printMap = new HashMap<>();
                 data.forEach((k, l) -> printMap.put(k, Arrays.asList(l)));
                 LoggerFactory.getLogger(ParamConstructable.class).info("cannot read completely from params : {}", printMap);
                 suc.val(false);
@@ -56,15 +66,6 @@ public interface ParamConstructable extends Entity {
         });
 
         return suc.val();
-    }
-
-    public static <T> T asT(Map<String, String[]> data, String key, Function<String, T> fn) {
-        String[] strings = data.get(key);
-        if (null != strings && 0 < strings.length) {
-            return fn.apply(strings[0]);
-        }
-        LoggerFactory.getLogger(ParamConstructable.class).info("cannot read from params, field : {}", key);
-        return null;
     }
 
 }

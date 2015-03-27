@@ -28,7 +28,7 @@
                 var url = $("#url").val();
                 var postData;
                 try {
-                    postData = jQuery.parseJSON($("#data").val());
+                    postData = jQuery.parseJSON( $("#data").val() );
                 } catch ( e ) {
                     postData = {};
                 }
@@ -48,6 +48,7 @@
                     }
                 });
             });
+
             var data = $("#data");
             data.keyup(function(e) {
                 var caret = data.caret();
@@ -67,6 +68,7 @@
                     } else {
                         val = val.substring(0, caret) + "]" + val.substring(caret);
                     }
+                    isChanged = true;
                 }
                 if ( isChanged ) {
                     data.val(val);
@@ -81,7 +83,7 @@
 
 <textarea id="url" rows="1" cols="50">/api/v1/</textarea>
 <a id="send">send</a><br><hr>
-<textarea id="data" rows="5" cols="56"></textarea><br>
+<textarea id="data" rows="5" cols="56" wrap="soft"></textarea><br>
 <textarea id="console" rows="5" cols="56" readonly></textarea>
 <br><hr>
 

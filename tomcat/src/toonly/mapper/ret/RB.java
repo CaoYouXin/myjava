@@ -24,6 +24,9 @@ public class RB {
 
     public static final String RB_BLOCK = "503";
     public static final String RB_ERROR = "500";
+    public static final String RB_EMPTY = "empty";
+    public static final String RB_RET_NULL = "null";
+    public static final String RB_NONSENSE = "nonsense";
 
     private Map<String, Object> normalData;
 

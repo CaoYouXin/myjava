@@ -3,6 +3,7 @@ package toonly.mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import toonly.appobj.AppFactory;
+import toonly.appobj.InvokeAppError;
 import toonly.appobj.UnPermissioned;
 import toonly.dbmanager.base.Jsonable;
 import toonly.dbmanager.lowlevel.RS;
@@ -84,7 +85,7 @@ public class FlagMapper extends HttpServlet {
             this.ret(resp, info[1], invokeRet);
             return;
         }
-        sendResponse(resp, this.buildRB(false, "app 执行调用返回 null", null));
+        sendResponse(resp, new RB().put(RB_KEY_EXP, RB_RET_NULL));
     }
 
     private void readData(HttpServletRequest req) throws IOException {
@@ -119,17 +120,21 @@ public class FlagMapper extends HttpServlet {
                 return true;
             }
         } catch (Exception e) {
-            sendResponse(resp, new RB().put(RB_KEY_EXP, RB_ERROR));
+            if (e instanceof UnPermissioned) {
+                sendResponse(resp, new RB().put(RB_KEY_EXP, RB_BLOCK));
+            } else {
+                sendResponse(resp, new RB().put(RB_KEY_EXP, RB_ERROR));
+            }
             return true;
         }
         return false;
     }
 
     private void ret(HttpServletResponse resp, String info, Object invokeRet) throws IOException {
-        if (null == invokeRet) {
-            sendResponse(resp, this.buildRB(false, "app object produced null ret", null));
-        } else if (invokeRet instanceof UnPermissioned) {
-            sendResponse(resp, this.buildRB(false, "unpermissioned", null));
+        if (invokeRet instanceof UnPermissioned) {
+            sendResponse(resp, new RB().put(RB_KEY_EXP, RB_BLOCK));
+        } else if (invokeRet instanceof InvokeAppError) {
+            sendResponse(resp, new RB().put(RB_KEY_EXP, RB_ERROR));
         }
 
         Set<Boolean> booleanSet = new HashSet<>();
@@ -145,7 +150,7 @@ public class FlagMapper extends HttpServlet {
                 booleanSet.add(false);
         }
         if (!booleanSet.contains(true)) {
-            sendResponse(resp, this.buildRB(false, "nonsense", null));
+            sendResponse(resp, new RB().put(RB_KEY_EXP, RB_NONSENSE));
         }
     }
 
@@ -162,7 +167,7 @@ public class FlagMapper extends HttpServlet {
             RS rs = (RS) invokeRet;
 
             if (rs.isEmpty()) {
-                sendResponse(resp, this.buildRB(false, "empty rs", null));
+                sendResponse(resp, new RB().put(RB_KEY_EXP, RB_EMPTY));
                 return true;
             }
 

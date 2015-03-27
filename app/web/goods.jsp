@@ -10,8 +10,8 @@
 <!--[if IE 9]><link href="css/ie9.css" rel="stylesheet" type="text/css" /><![endif]-->
 
 <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
-<script type="text/javascript" src="js/jquery.cookie.js"></script>
 <script type="text/javascript" src="js/jquery-ui-1.9.2.min.js"></script>
+<script type="text/javascript" src="js/jquery.cookie.js"></script>
 
 <script type="text/javascript" src="js/plugins/ui/jquery.easytabs.min.js"></script>
 <script type="text/javascript" src="js/plugins/ui/jquery.collapsible.min.js"></script>
@@ -21,20 +21,34 @@
 
 <script type="text/javascript" src="js/files/functions_blank.js"></script>
 <script type="text/javascript" src="js/user/user.cookie.js"></script>
+<script type="text/javascript" src="js/form.util.js"></script>
+<script type="text/javascript" src="js/ajax.util.js"></script>
 
 <script type="text/javascript">
 	$(function(){
-		$(document).ajaxComplete(function( event, xhr, settings ) {
-			console.log( "Triggered ajaxComplete handler. The status is " + xhr.status + ", result is " + xhr.responseText );
-		});
 
 		var username = getUserName();
 		alert("当前用户：" +username);
 
-        $("#search_btn").click(function(event) {
-            console.log($("#form").serialize());
-			$.post('/api/v1/entity/goods/add', function(data) {
-				console.log(data);
+        $("#search_btn").click(function() {
+			var formData = getFormJson($("#form"));
+			formData.un = getUserName();
+			$.ajax('/api/v1/entity/goods/filterSelect', {
+				type: "POST",
+				data: formData,
+				dataType: "json",
+				success: function (data) {
+					if ( data.suc === 'True' ) {
+						$.each(data.data, function( i, goods ) {
+							console.log(goods.code + " " + goods.name + " " + goods.color + " " + goods.size);
+						});
+					}
+				},
+				error: function (jqXHR, textStatus, errorThrown) {
+					alert("有问题啦！！！" + jqXHR + "！！！" + textStatus + "！！！" + errorThrown);
+					alert("问题详情（返回状态）！！！" + jqXHR.status);
+					alert("问题详情（返回内容）！！！" + jqXHR.responseText);
+				}
 			});
         });
 	});
@@ -114,7 +128,7 @@
 
                                 <div class="form-actions align-right">
                                     <%--<span class="help-inline">Right aligned buttons</span>--%>
-                                    <button id="search_btn" type="submit" class="btn btn-primary">查找</button>
+                                    <button id="search_btn" type="button" class="btn btn-primary">查找</button>
                                     <button id="add_btn" type="button" class="btn btn-danger">添加</button>
                                     <button type="reset" class="btn">重置</button>
                                 </div>

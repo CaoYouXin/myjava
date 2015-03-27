@@ -71,6 +71,11 @@ public class ECCalculator {
     }
 
     private boolean readColumn(Field declaredField) throws IllegalAccessException {
+        DT type = declaredField.getDeclaredAnnotation(DT.class);
+        if (null != type) {
+            this.dataType.put(declaredField.getName(), type);
+        }
+
         Column declaredAnnotation = declaredField.getDeclaredAnnotation(Column.class);
         if (null == declaredAnnotation) {
             return true;
@@ -96,22 +101,11 @@ public class ECCalculator {
         if (null != keyColumn) {
             this.keyFs.add(declaredField.getName());
         }
-
-        DT type = declaredField.getDeclaredAnnotation(DT.class);
-        if (null == type) {
-            throw new AnnotationCorruptedException("no db type defined");
-        }
-        this.dataType.put(declaredField.getName(), type);
     }
 
     public void dtForEach(@NotNull BiConsumer<String, DT> biConsumer) {
         scan();
         this.dataType.forEach(biConsumer);
-    }
-
-    public void dataForEach(@NotNull BiConsumer<String, Object> biConsumer) {
-        scan();
-        this.data.forEach(biConsumer);
     }
 
     public List<String> getFields() {

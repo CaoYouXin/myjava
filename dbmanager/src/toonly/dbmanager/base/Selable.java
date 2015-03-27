@@ -40,6 +40,9 @@ public interface Selable extends Entity {
 
         TableId tableId = new TableId(this.getSchemaName(), this.getTableName());
         List<String> whereFields = ecc.getNotNullFields();
+        if (whereFields.isEmpty()) {
+            return select();
+        }
         Where where = new Where(new Equal(tableId, whereFields.get(0)));
         whereFields.subList(1, whereFields.size()).forEach(f -> where.addExpression(true, new Equal(tableId, f)));
 

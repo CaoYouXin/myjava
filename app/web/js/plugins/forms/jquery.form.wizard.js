@@ -17,6 +17,8 @@
 
 		_init: function() {
 
+			console.log(this.options);
+
 			var wizard = this;
 			var formOptionsSuccess = this.options.formOptions.success;
 			var formOptionsComplete = this.options.formOptions.complete;
@@ -443,9 +445,9 @@
 			submitStepClass : "submit_step",
 			back : ":reset",
 			next : ":submit",
-			textSubmit : 'Submit',
-			textNext : 'Next',
-			textBack : 'Back',
+			textSubmit : '提交',
+			textNext : '下一步',
+			textBack : '上一步',
 			remoteAjax : undefined,
 			inAnimation : {opacity: 'show'},
 			outAnimation: {opacity: 'hide'},

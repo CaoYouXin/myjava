@@ -16,6 +16,9 @@ $(function() {
                 alert( '所调之命令不存在' );
             } else if ( json.exp === 'empty' ) {
                 alert( '没有符合要求的数据' );
+            } else if ( json.exp === 'not login' ) {
+                alert( '登录超时，请重新登录' );
+                window.self.location = "/login.html";
             }
         }
     });

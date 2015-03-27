@@ -10,19 +10,13 @@
 <div id="footer">
     <div class="copyrights">Copyright &copy; 2015.CPU All rights reserved.<a target="_blank" href="https://github.com/CaoYouXin/myjava">项目托管</a></div>
     <ul class="footer-links ">
-        <li class="dropup">
-            <a class="user-menu" data-toggle="dropdown"><i class="icon-cogs"></i><span>联系管理员<b class="caret"></b></span></a>
-            <ul class="dropdown-menu">
-                <li>
-                    <a href="#data" class="lightbox"><i class="icon-user"></i>曹同学【开发人员】</a>
-                    <div style="display:none"><div id="data">
-                        <br>邮箱：c_youxin@163.com
-                        <br>电话：18535276856
-                    </div></div>
-                </li>
-            </ul>
-        </li>
-        <li><a href="" title="" class="user-menu"><i class="icon-screenshot"></i>报告错误</a></li>
+        <li><a href="#data" title="" class="lightbox"><i class="icon-cogs"></i>联系 admin</a></li>
+        <div style="display:none"><div id="data">
+            <br>曹同学【开发人员】
+            <br>邮箱：c_youxin@163.com
+            <br>电话：18535276856
+        </div></div>
+        <li><a href="" title=""><i class="icon-screenshot"></i>报告 bug</a></li>
     </ul>
 </div>
 <!-- /footer -->

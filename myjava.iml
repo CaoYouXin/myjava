@@ -5,5 +5,10 @@
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="log4j-1.2.17" level="project" />
+    <orderEntry type="library" name="jackson-annotations-2.5.1-javadoc" level="project" />
+    <orderEntry type="library" name="hipchatevanwong" level="project" />
+    <orderEntry type="library" name="commons-codec-1.9" level="project" />
+    <orderEntry type="library" name="mysql-connector-java-5.1.34-bin" level="project" />
   </component>
 </module>

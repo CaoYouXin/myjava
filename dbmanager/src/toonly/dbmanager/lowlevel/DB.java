@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import toonly.debugger.Debugger;
 import toonly.wrapper.SW;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.sql.*;
 import java.util.ArrayList;
@@ -46,8 +47,8 @@ public final class DB {
     private DS ds;
 
     private DB() {
-        this.ds = new DS();
-        LOGGER.info("data source:{}{}", LINE_SEPARATOR, this.ds.toString());
+//        this.ds = new DS();
+//        LOGGER.info("data source:{}{}", LINE_SEPARATOR, this.ds.toString());
     }
     //End 常量定义
 
@@ -58,10 +59,19 @@ public final class DB {
     public static DB instance(DSConstructor sdc) {
         DS ds = sdc.construct();
         INSTANCE.ds = (null != ds) ? ds : INSTANCE.ds;
+        LOGGER.info("data source:{}{}", LINE_SEPARATOR, INSTANCE.ds.toString());
         return INSTANCE;
     }
 
     private static boolean asExpected(boolean isInsert, int ret, int expected, boolean isDrop) {
+        LOGGER.info("isInsert : {}; ret : {}; expected : {}; isDrop : {}.", isInsert, ret, expected, isDrop);
+        if (isDrop) {
+            return true;
+        }
+        return isInsert ? asExpectedWhenInsert(ret, expected) : expected == ret;
+    }
+
+    private static boolean asExpected2(boolean isInsert, int ret, int expected, boolean isDrop) {
         Debugger.debugRun(DB.class, () ->
                 LOGGER.info("isInsert : {}; ret : {}; expected : {}; isDrop : {}.", isInsert, ret, expected, isDrop));
         if (isDrop) {
@@ -79,6 +89,14 @@ public final class DB {
     }
 
     private void debug(String sql, List<Object> params) {
+        if (null != params && !params.isEmpty()) {
+            LOGGER.info("{}SQL wa [{}]{}\tParams wa {}", LINE_SEPARATOR, sql, LINE_SEPARATOR, params);
+        } else {
+            LOGGER.info("{}SQL wa [{}]", LINE_SEPARATOR, sql);
+        }
+    }
+
+    private void debug2(String sql, List<Object> params) {
         Debugger.debugRun(this, () -> {
             if (null != params && !params.isEmpty()) {
                 LOGGER.info("{}SQL wa [{}]{}\tParams wa {}", LINE_SEPARATOR, sql, LINE_SEPARATOR, params);
@@ -100,14 +118,31 @@ public final class DB {
         LOGGER.info("location in DB : {}", locationString);
     }
 
-    public RS simpleQuery(String sql) {
+    public RS simpleQuery(Connection conn, String sql) throws SQLException {
         this.debug(sql, null);
 
-        String[] labels = parseLabels(sql);
-        try (Connection conn = this.ds.getConnection();
-             Statement stat = conn.createStatement();
-             ResultSet rs = stat.executeQuery(sql)) {
-            return new RS(rs, labels);
+        Statement stat = conn.createStatement();
+        ResultSet rs = stat.executeQuery(sql);
+        return new RS(rs, parseLabels(sql));
+    }
+
+    public RS simpleQuery(String sql) {
+        try (Connection conn = this.ds.getConnection()) {
+            return this.simpleQuery(conn, sql);
+        } catch (SQLException ex) {
+            this.log(ex);
+            return new RS();
+        }
+    }
+
+    public RS preparedQuery(Connection conn, String sql, List<Object> params) {
+        this.debug(sql, params);
+
+        try (PreparedStatement stat = conn.prepareStatement(sql)) {
+            parsePlaceholders(stat, params);
+            try (ResultSet rs = stat.executeQuery()) {
+                return new RS(rs, parseLabels(sql));
+            }
         } catch (SQLException ex) {
             this.log(ex);
             return new RS();
@@ -115,22 +150,20 @@ public final class DB {
     }
 
     public RS preparedQuery(String sql, List<Object> params) {
-        return this.preparedQuery(sql, params.toArray());
-    }
-
-    public RS preparedQuery(String sql, Object... params) {
-        this.debug(sql, Arrays.asList(params));
-
-        String[] labels = parseLabels(sql);
-        try (Connection conn = this.ds.getConnection(); PreparedStatement stat = conn.prepareStatement(sql)) {
-            parsePlaceholders(stat, params);
-            try (ResultSet rs = stat.executeQuery()) {
-                return new RS(rs, labels);
-            }
+        try (Connection conn = this.ds.getConnection()) {
+            return this.preparedQuery(conn, sql, params);
         } catch (SQLException ex) {
             this.log(ex);
             return new RS();
         }
+    }
+
+    public RS preparedQuery(Connection conn, String sql, Object... params) {
+        return this.preparedQuery(conn, sql, Arrays.asList(params));
+    }
+
+    public RS preparedQuery(String sql, Object... params) {
+        return this.preparedQuery(sql, Arrays.asList(params));
     }
 
     private String[] parseLabels(String sql) {
@@ -140,7 +173,7 @@ public final class DB {
         String labelSql = sql.substring(upperSql.indexOf(select) + select.length(), upperSql.indexOf(from));
         List<String> labels = new ArrayList<>();
         this.readCharByChar(labelSql.toCharArray(), labels);
-        return labels.toArray(new String[0]);
+        return labels.toArray(new String[labels.size()]);
     }
 
     private void readCharByChar(char[] chars, List<String> labels) {
@@ -310,7 +343,7 @@ public final class DB {
         boolean isInsert = isInsert(sql);
         boolean isDrop = isDrop(sql);
         try (PreparedStatement stat = conn.prepareStatement(sql)) {
-            parsePlaceholders(stat, params);
+            parsePlaceholders(stat, Arrays.asList(params));
             int ret = stat.executeUpdate();
             return asExpected(isInsert, ret, expected, isDrop);
         }
@@ -367,7 +400,7 @@ public final class DB {
         boolean isDrop = isDrop(sql);
         try (PreparedStatement stat = conn.prepareStatement(sql)) {
             for (Object[] objects : params) {
-                parsePlaceholders(stat, objects);
+                parsePlaceholders(stat, Arrays.asList(objects));
                 stat.addBatch();
             }
             int[] counts = stat.executeBatch();
@@ -397,7 +430,7 @@ public final class DB {
         try (PreparedStatement stat = conn.prepareStatement(sql)) {
             for (int i = 0; i < expected; i++) {
                 Object[] objects = batch.row(i);
-                parsePlaceholders(stat, objects);
+                parsePlaceholders(stat, Arrays.asList(objects));
                 stat.addBatch();
             }
             int[] counts = stat.executeBatch();
@@ -420,6 +453,8 @@ public final class DB {
         } catch (SQLException ex) {
             this.log(ex);
             return false;
+        } catch (IOException e) {
+            return false;
         }
     }
 
@@ -431,7 +466,7 @@ public final class DB {
         return sql.trim().toUpperCase().startsWith("DROP");
     }
 
-    private void parsePlaceholders(PreparedStatement stat, Object[] params) throws SQLException {
+    private void parsePlaceholders(PreparedStatement stat, List<Object> params) throws SQLException {
         int index = 1;
         for (Object obj : params) {
             if (obj instanceof Integer) {

@@ -5,6 +5,7 @@
  */
 package toonly.dbmanager.lowlevel;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -13,6 +14,6 @@ import java.sql.SQLException;
  */
 public interface Trans {
 
-    void trans(Connection conn) throws SQLException;
+    void trans(Connection conn) throws SQLException, IOException;
 
 }

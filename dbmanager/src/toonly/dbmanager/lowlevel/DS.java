@@ -25,14 +25,13 @@ public class DS implements DataSource {
     private Queue<Connection> connections;
     private int max = 0;
 
-    public DS() {
+    public DS(String ip, int port, String username, String password) {
 
-        Properties props = this.getConnInfo();
-        this.url = props.getProperty("url", "jdbc:mysql://localhost:3306?useUnicode=true&amp;characterEncoding=utf8&amp;autoReconnect=true&amp;characterSetResults=utf8&amp;failOverReadOnly");
-        this.username = props.getProperty("username", "root");
-        this.password = props.getProperty("password", "root");
+        this.url = String.format("jdbc:mysql://%s:%d?characterEncoding=UTF-8", ip, port);
+        this.username = username;
+        this.password = password;
         try {
-            Class.forName(props.getProperty("driverClassName", "com.mysql.jdbc.Driver"));
+            Class.forName("com.mysql.jdbc.Driver");
         } catch (ClassNotFoundException e) {
             LOGGER.info("Driver not found.");
             this.suc = false;
@@ -43,6 +42,25 @@ public class DS implements DataSource {
         this.makeMoreConnections(10);
         this.suc = true;
     }
+//
+//    public DS() {
+//
+//        Properties props = this.getConnInfo();
+//        this.url = props.getProperty("url", "jdbc:mysql://localhost:3306?characterEncoding=UTF-8");
+//        this.username = props.getProperty("username", "root");
+//        this.password = props.getProperty("password", "root");
+//        try {
+//            Class.forName(props.getProperty("driverClassName", "com.mysql.jdbc.Driver"));
+//        } catch (ClassNotFoundException e) {
+//            LOGGER.info("Driver not found.");
+//            this.suc = false;
+//            return;
+//        }
+//
+//        this.connections = new ConcurrentLinkedQueue<>();
+//        this.makeMoreConnections(10);
+//        this.suc = true;
+//    }
 
     public boolean isSuc() {
         return suc;

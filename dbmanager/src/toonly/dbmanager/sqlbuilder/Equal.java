@@ -29,7 +29,7 @@ public class Equal implements Expression {
         }
 
         if (this.needWrap) {
-            return String.format("%s.`%s` = `%s`", this.tableId.toSql(), this.column, this.expect);
+            return String.format("%s.`%s` = '%s'", this.tableId.toSql(), this.column, this.expect);
         }
         return String.format("%s.`%s` = %s", this.tableId.toSql(), this.column, this.expect);
     }

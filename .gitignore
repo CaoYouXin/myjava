@@ -1,10 +1,7 @@
 # Created by .ignore support plugin (hsz.mobi)
 .idea/*
 out/*
-app/test/log4j.properties
-tomcat/test/log4j.properties
-wrapper/test/log4j.properties
-configer/test/log4j.properties
-debugger/test/log4j.properties
-dbmanager/test/log4j.properties
-*/*.iml
+*.iml
+*.MF
+*.csv
+*.xlsx

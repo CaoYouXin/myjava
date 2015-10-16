@@ -155,4 +155,12 @@ public class RS {
     public boolean isEmpty() {
         return 0 == this.getRow();
     }
+
+    @Override
+    public String toString() {
+        return "RS{" +
+                "cur=" + cur +
+                ", data=" + data.get(cur).toString() +
+                '}';
+    }
 }

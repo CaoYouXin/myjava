@@ -55,6 +55,11 @@ public class StringWrapper extends SW<String> {
         return this;
     }
 
+    public StringWrapper wrap(String pre, String post) {
+        this.val(pre + this.val() + post);
+        return this;
+    }
+
     public StringWrapper md5Len32() {
         return this.md5(sb -> sb.toString());
     }

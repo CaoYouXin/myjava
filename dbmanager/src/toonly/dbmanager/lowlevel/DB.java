@@ -118,12 +118,29 @@ public final class DB {
         LOGGER.info("location in DB : {}", locationString);
     }
 
+    public RS simpleQuery2(Connection conn, String sql, List<String> coloums) throws SQLException {
+        this.debug(sql, null);
+
+        Statement stat = conn.createStatement();
+        ResultSet rs = stat.executeQuery(sql);
+        return new RS(rs, coloums.toArray(new String[0]));
+    }
+
     public RS simpleQuery(Connection conn, String sql) throws SQLException {
         this.debug(sql, null);
 
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery(sql);
         return new RS(rs, parseLabels(sql));
+    }
+
+    public RS simpleQuery2(String sql, List<String> coloums) {
+        try (Connection conn = this.ds.getConnection()) {
+            return this.simpleQuery2(conn, sql, coloums);
+        } catch (SQLException ex) {
+            this.log(ex);
+            return new RS();
+        }
     }
 
     public RS simpleQuery(String sql) {

@@ -41,12 +41,15 @@ public class RS {
         return !isAfterLast() && ++cur < data.size();
     }
 
-    private Object getObject(String columnLabel) {
+    public Object getObject(String columnLabel) {
         return data.get(cur).get(columnLabel);
     }
 
     public String getString(String columnLabel) {
         Object obj = getObject(columnLabel);
+        if (null == obj) {
+            return "";
+        }
         if (!(obj instanceof String)) {
             throw new RSException(columnLabel, "String", obj);
         }
@@ -71,6 +74,9 @@ public class RS {
 
     public long getLong(String columnLabel) {
         Object obj = getObject(columnLabel);
+        if (null == obj) {
+            return 0;
+        }
         if (!(obj instanceof Long)) {
             throw new RSException(columnLabel, "Long", obj);
         }
@@ -148,5 +154,13 @@ public class RS {
 
     public boolean isEmpty() {
         return 0 == this.getRow();
+    }
+
+    @Override
+    public String toString() {
+        return "RS{" +
+                "cur=" + cur +
+                ", data=" + data.get(cur).toString() +
+                '}';
     }
 }
